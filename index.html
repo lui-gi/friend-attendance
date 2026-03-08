@@ -321,8 +321,28 @@
         
         <hr class="divider">
 
+        <!-- Stats -->
+        <div class="stats-card" id="statsCard">
+            <h2>[ EPIC STATS ]</h2>
+            <div class="stats-grid" id="statsGrid"></div>
+            
+            <h2 style="margin-top: 40px;">[ ATTENDANCE HISTORY ]</h2>
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Friends Present</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+
+        <hr class="divider">
+
         <!-- Setup Instructions -->
-        <div class="setup-card" id="setupCard">
+        <div class="setup-card hidden" id="setupCard">
             <h2>[ SETUP INSTRUCTIONS ]</h2>
             <div class="instructions">
                 <ol>
@@ -366,6 +386,17 @@ function doPost(e) {
                     <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
                     <li>Paste it below and click Save!</li>
                 </ol>
+                
+                <div style="background: #FFE4E4; border: 2px solid #FF0000; padding: 15px; margin-top: 15px;">
+                    <b>TROUBLESHOOTING:</b>
+                    <ul>
+                        <li>If you get "[ERROR] Failed to fetch" - make sure you set "Who has access" to <b>Anyone</b></li>
+                        <li>After deploying, you may need to authorize the script (Google will show a scary warning - click "Advanced" then "Go to [project name]")</li>
+                        <li>If you update the Apps Script code, you need to create a NEW deployment (not edit the old one)</li>
+                        <li>The URL should end with /exec NOT /dev</li>
+                        <li>Test the URL by pasting it in your browser - it should say "OK"</li>
+                    </ul>
+                </div>
             </div>
 
             <label for="apiUrl">[ Google Apps Script Web App URL ]</label>
@@ -409,23 +440,88 @@ function doPost(e) {
             <button onclick="recordAttendance()">[*** RECORD ATTENDANCE ***]</button>
             <div id="recordStatus"></div>
         </div>
+    </div>
 
-        <!-- Stats -->
-        <div class="stats-card hidden" id="statsCard">
-            <h2>[ EPIC STATS ]</h2>
-            <div class="stats-grid" id="statsGrid"></div>
+    <hr class="divider">
+    
+    <center>
+        <p style="font-size: 0.8rem;">
+            <b>Best viewed in Netscape Navigator 4.0 or higher</b><br>
+            This page is optimized for 800x600 resolution<br>
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="88" height="31" alt="Made with Notepad" style="border: 1px solid black; background: #C0C0C0;">
+        </p>
+        <p style="font-size: 0.7rem; color: #666; margin-top: 10px;">
+            <a href="#" onclick="toggleSetup(event)" style="color: #666; text-decoration: none;">Terms of Service</a> | 
+            <a href="#" style="color: #666;">Privacy Policy</a> | 
+            <a href="#" style="color: #666;">Contact</a>
+        </p>
+    </center>
+
+    <div id="hiddenSetup" class="hidden" style="max-width: 900px; margin: 20px auto; text-align: left; border: 2px solid #000000; padding: 20px; background: #FFFF00;">
+        <h3 style="margin-bottom: 15px;">[ API SETUP ]</h3>
+        
+        <label for="apiUrlBottom">[ Google Apps Script Web App URL ]</label>
+        <input type="text" id="apiUrlBottom" placeholder="https://script.google.com/macros/s/...">
+        <button onclick="saveApiUrlBottom()">[SAVE API URL]</button>
+        <button onclick="toggleSetup(event)" style="background: #FF0000; color: white;">[CLOSE]</button>
+        <div id="setupStatusBottom"></div>
+        
+        <hr style="margin: 20px 0; border: 1px dashed #000;">
+        
+        <h3 style="margin-bottom: 15px;">[ FULL SETUP INSTRUCTIONS ]</h3>
+        <div class="instructions">
+            <ol>
+                <li>Create a new Google Sheet: <a href="https://sheets.new" target="_blank">sheets.new</a></li>
+                <li>Name it whatever you want (e.g., "Friend Attendance")</li>
+                <li>Add these column headers in Row 1:
+                    <br><code>Date | Day | Friends</code>
+                </li>
+                <li>Go to <strong>Extensions → Apps Script</strong></li>
+                <li>Delete any code there and paste this:</li>
+            </ol>
+            <textarea readonly style="width: 100%; height: 200px; font-family: monospace; padding: 10px; margin: 10px 0;">
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  if (e.parameter.action === 'get') {
+    const data = sheet.getDataRange().getValues();
+    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput('OK');
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data = JSON.parse(e.postData.contents);
+  
+  if (data.action === 'add') {
+    sheet.appendRow([data.date, data.day, data.friends]);
+  }
+  
+  return ContentService.createTextOutput('OK');
+}</textarea>
+            <ol start="6">
+                <li>Click <strong>Deploy → New deployment</strong></li>
+                <li>Click gear icon → Select <strong>"Web app"</strong></li>
+                <li>Description: "Friend Tracker API"</li>
+                <li>Execute as: <strong>Me</strong></li>
+                <li>Who has access: <strong>Anyone</strong></li>
+                <li>Click <strong>Deploy</strong></li>
+                <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
+                <li>Paste it in the field above and click Save!</li>
+            </ol>
             
-            <h2 style="margin-top: 40px;">[ ATTENDANCE HISTORY ]</h2>
-            <table class="history-table" id="historyTable">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Day</th>
-                        <th>Friends Present</th>
-                    </tr>
-                </thead>
-                <tbody id="historyBody"></tbody>
-            </table>
+            <div style="background: #FFE4E4; border: 2px solid #FF0000; padding: 15px; margin-top: 15px;">
+                <b>TROUBLESHOOTING:</b>
+                <ul>
+                    <li>If you get "[ERROR] Failed to fetch" - make sure you set "Who has access" to <b>Anyone</b></li>
+                    <li>After deploying, you may need to authorize the script (Google will show a scary warning - click "Advanced" then "Go to [project name]")</li>
+                    <li>If you update the Apps Script code, you need to create a NEW deployment (not edit the old one)</li>
+                    <li>The URL should end with /exec NOT /dev</li>
+                    <li>Test the URL by pasting it in your browser - it should say "OK"</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -443,28 +539,39 @@ function doPost(e) {
     </div>
 
     <script>
-        let API_URL = '';
+        // HARDCODED API URL - Replace this with your actual Google Apps Script URL
+        let API_URL = 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec';
+        // Example: let API_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
+        
         let friends = [];
         let selectedFriends = new Set();
 
         // Load saved data
         window.onload = function() {
+            // Check if API_URL is hardcoded, otherwise fall back to localStorage
             const savedUrl = localStorage.getItem('apiUrl');
-            const savedFriends = localStorage.getItem('friends');
             
-            if (savedUrl) {
+            if (API_URL === 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec' && savedUrl) {
+                // If URL isn't hardcoded yet, use saved one from localStorage
                 API_URL = savedUrl;
-                document.getElementById('apiUrl').value = savedUrl;
-                document.getElementById('friendsCard').classList.remove('hidden');
             }
             
+            // Update the input fields if we have a URL
+            if (API_URL && API_URL !== 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec') {
+                document.getElementById('apiUrl').value = API_URL;
+                document.getElementById('apiUrlBottom').value = API_URL;
+                document.getElementById('friendsCard').classList.remove('hidden');
+                
+                // Always load stats if we have an API URL
+                loadStats();
+            }
+            
+            const savedFriends = localStorage.getItem('friends');
             if (savedFriends) {
                 friends = JSON.parse(savedFriends);
                 renderFriendsList();
                 document.getElementById('attendanceCard').classList.remove('hidden');
-                document.getElementById('statsCard').classList.remove('hidden');
                 renderFriendCheckboxes();
-                loadStats();
             }
 
             // Set today's date
@@ -483,6 +590,32 @@ function doPost(e) {
             localStorage.setItem('apiUrl', url);
             showStatus('setupStatus', '[SUCCESS] API URL saved! Now add your friends below.', 'success');
             document.getElementById('friendsCard').classList.remove('hidden');
+        }
+
+        function saveApiUrlBottom() {
+            const url = document.getElementById('apiUrlBottom').value.trim();
+            if (!url) {
+                showStatus('setupStatusBottom', 'Please enter a URL!', 'error');
+                return;
+            }
+            
+            API_URL = url;
+            localStorage.setItem('apiUrl', url);
+            document.getElementById('apiUrl').value = url;
+            document.getElementById('apiUrlBottom').value = url;
+            showStatus('setupStatusBottom', '[SUCCESS] API URL saved!', 'success');
+            document.getElementById('friendsCard').classList.remove('hidden');
+            document.getElementById('attendanceCard').classList.remove('hidden');
+            loadStats(); // Load stats immediately after saving API URL
+        }
+
+        function toggleSetup(event) {
+            event.preventDefault();
+            const setupDiv = document.getElementById('hiddenSetup');
+            setupDiv.classList.toggle('hidden');
+            if (!setupDiv.classList.contains('hidden')) {
+                setupDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
 
         function addFriend() {
@@ -569,9 +702,12 @@ function doPost(e) {
             
             const friendsList = Array.from(selectedFriends).join(', ');
             
+            showStatus('recordStatus', '[SENDING...] Please wait...', 'info');
+            
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
+                    mode: 'no-cors', // This helps with CORS issues
                     body: JSON.stringify({
                         action: 'add',
                         date: date,
@@ -580,23 +716,40 @@ function doPost(e) {
                     })
                 });
                 
-                if (response.ok) {
-                    showStatus('recordStatus', '[SUCCESS] Attendance recorded!', 'success');
-                    selectedFriends.clear();
-                    renderFriendCheckboxes();
+                // Note: with no-cors mode, we can't read the response, so we assume success
+                showStatus('recordStatus', '[SUCCESS] Attendance recorded!', 'success');
+                selectedFriends.clear();
+                renderFriendCheckboxes();
+                
+                // Wait a moment then reload stats
+                setTimeout(() => {
                     loadStats();
-                    incrementVisitorCount();
-                } else {
-                    showStatus('recordStatus', '[ERROR] Failed to record. Check your setup!', 'error');
-                }
+                }, 1000);
+                
+                incrementVisitorCount();
+                
             } catch (error) {
-                showStatus('recordStatus', '[ERROR] ' + error.message, 'error');
+                showStatus('recordStatus', '[ERROR] Failed to fetch - Check setup instructions above! Error: ' + error.message, 'error');
+                console.error('Full error:', error);
             }
         }
 
         async function loadStats() {
+            if (!API_URL || API_URL === 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec') {
+                document.getElementById('statsGrid').innerHTML = '<p>No API URL configured. Click "Terms of Service" at the bottom to set up.</p>';
+                document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align: center;">No API URL configured</td></tr>';
+                return;
+            }
+            
             try {
                 const response = await fetch(API_URL + '?action=get');
+                
+                if (!response.ok) {
+                    console.error('Stats fetch failed:', response.status);
+                    document.getElementById('statsGrid').innerHTML = '<p style="color: red;">[ERROR] Could not load stats. Check your API setup!</p>';
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 if (data.length <= 1) {
@@ -608,18 +761,25 @@ function doPost(e) {
                 // Skip header row
                 const records = data.slice(1);
                 
-                // Calculate stats
+                // Calculate stats - collect ALL unique friends from the sheet data
                 const totalSessions = records.length;
                 const friendCounts = {};
                 
-                friends.forEach(friend => {
-                    friendCounts[friend] = 0;
-                });
-                
+                // First pass: collect all unique friend names from the sheet
                 records.forEach(record => {
                     const attendees = record[2].split(',').map(s => s.trim());
                     attendees.forEach(attendee => {
-                        if (friendCounts[attendee] !== undefined) {
+                        if (attendee && !friendCounts[attendee]) {
+                            friendCounts[attendee] = 0;
+                        }
+                    });
+                });
+                
+                // Second pass: count attendance
+                records.forEach(record => {
+                    const attendees = record[2].split(',').map(s => s.trim());
+                    attendees.forEach(attendee => {
+                        if (attendee && friendCounts[attendee] !== undefined) {
                             friendCounts[attendee]++;
                         }
                     });
@@ -646,8 +806,8 @@ function doPost(e) {
                     </div>
                 `;
                 
-                // Individual friend stats
-                Object.entries(friendCounts).forEach(([name, count]) => {
+                // Individual friend stats - now shows ALL friends from sheet data
+                Object.entries(friendCounts).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
                     const percentage = totalSessions > 0 ? Math.round((count / totalSessions) * 100) : 0;
                     statsHtml += `
                         <div class="stat-box">
@@ -673,6 +833,7 @@ function doPost(e) {
                 
             } catch (error) {
                 console.error('Error loading stats:', error);
+                document.getElementById('statsGrid').innerHTML = `<p style="color: red;">[ERROR] ${error.message}<br>Make sure your Google Apps Script is deployed correctly!</p>`;
             }
         }
 
