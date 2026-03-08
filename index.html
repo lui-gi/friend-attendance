@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>*** FRIEND ZONE ATTENDANCE TRACKER ***</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #FFFFFF;
+            color: #000000;
+            padding: 20px;
+            background-image: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="white"/><circle cx="50" cy="50" r="1" fill="%23CCCCCC"/></svg>');
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .ascii-art {
+            font-family: monospace;
+            font-size: 10px;
+            line-height: 10px;
+            white-space: pre;
+            color: #0000FF;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        h1 {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 2rem;
+            text-align: center;
+            color: #FF0000;
+            margin-bottom: 10px;
+            font-weight: bold;
+            animation: blink 1.5s step-start infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .divider {
+            border: none;
+            border-top: 2px dashed #000000;
+            margin: 30px 0;
+        }
+
+        .setup-card, .input-card, .stats-card {
+            border: 3px solid #000000;
+            padding: 20px;
+            margin-bottom: 30px;
+            background: #FFFFFF;
+        }
+
+        .setup-card {
+            background: #FFFF00;
+            border: 3px double #000000;
+        }
+
+        .input-card {
+            background: #00FF00;
+            border: 3px ridge #000000;
+        }
+
+        .stats-card {
+            background: #00FFFF;
+            border: 3px groove #000000;
+        }
+
+        h2 {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #000000;
+            text-transform: uppercase;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background: #EEEEEE;
+            padding: 15px;
+            border: 2px solid #000000;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .instructions code {
+            background: #FFFF99;
+            padding: 2px 4px;
+            border: 1px solid #000;
+            font-family: monospace;
+            color: #CC0000;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            font-size: 1rem;
+            border: 2px inset #808080;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 15px;
+            background: #FFFFFF;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #0000FF;
+            background: #FFFFCC;
+        }
+
+        button {
+            background: #C0C0C0;
+            color: #000000;
+            border: 2px outset #808080;
+            padding: 8px 20px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #FFFFFF;
+        }
+
+        button:active {
+            border-style: inset;
+        }
+
+        button:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+            color: #888888;
+        }
+
+        .friend-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .friend-checkbox {
+            background: #FFFFFF;
+            border: 2px solid #000000;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .friend-checkbox:hover {
+            background: #FFFF99;
+        }
+
+        .friend-checkbox.selected {
+            background: #FF0000;
+            color: #FFFFFF;
+            border: 2px solid #000000;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: #FFFFFF;
+            border: 2px solid #000000;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            color: #FF0000;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 2px solid #000000;
+        }
+
+        .history-table th {
+            background: #000000;
+            color: #00FF00;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            border: 2px solid #000000;
+        }
+
+        .history-table td {
+            background: #FFFFFF;
+            padding: 10px;
+            border: 1px solid #000000;
+        }
+
+        .history-table tr:nth-child(even) td {
+            background: #EEEEEE;
+        }
+
+        .status {
+            padding: 10px;
+            border: 2px solid #000000;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .status.success {
+            background: #00FF00;
+            color: #000000;
+        }
+
+        .status.error {
+            background: #FF0000;
+            color: #FFFFFF;
+        }
+
+        .status.info {
+            background: #00FFFF;
+            color: #000000;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .counter {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #FFFF00;
+            border: 2px solid #000000;
+            padding: 10px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        a {
+            color: #0000FF;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: #800080;
+        }
+
+        a:hover {
+            color: #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="ascii-art">
+  _____ ____  ___ _____ _   _ ____  
+ |  ___|  _ \|_ _| ____| \ | |  _ \ 
+ | |_  | |_) || ||  _| |  \| | | | |
+ |  _| |  _ < | || |___| |\  | |_| |
+ |_|   |_| \_\___|_____|_| \_|____/ 
+                                     
+    _  _____ _____ _____ _   _ ____   _    _   _  ____ _____ 
+   / \|_   _|_   _| ____| \ | |  _ \ / \  | \ | |/ ___| ____|
+  / _ \ | |   | | |  _| |  \| | | | / _ \ |  \| | |   |  _|  
+ / ___ \| |   | | | |___| |\  | |_| / ___ \| |\  | |___| |___ 
+/_/   \_\_|   |_| |_____|_| \_|____/_/   \_\_| \_|\____|_____|
+        </div>
+
+        <h1>*** FRIEND ZONE TRACKER ***</h1>
+        
+        <center>
+            <p><marquee width="80%" behavior="alternate">Welcome to the OFFICIAL Friend Attendance Tracking System!</marquee></p>
+            <p>[ Last Updated: <script>document.write(new Date().toLocaleDateString());</script> ]</p>
+        </center>
+        
+        <hr class="divider">
+
+        <!-- Setup Instructions -->
+        <div class="setup-card" id="setupCard">
+            <h2>[ SETUP INSTRUCTIONS ]</h2>
+            <div class="instructions">
+                <ol>
+                    <li>Create a new Google Sheet: <a href="https://sheets.new" target="_blank">sheets.new</a></li>
+                    <li>Name it whatever you want (e.g., "Friend Attendance")</li>
+                    <li>Add these column headers in Row 1:
+                        <br><code>Date | Day | Friends</code>
+                    </li>
+                    <li>Go to <strong>Extensions → Apps Script</strong></li>
+                    <li>Delete any code there and paste this:</li>
+                </ol>
+                <textarea readonly style="width: 100%; height: 200px; font-family: monospace; padding: 10px; margin: 10px 0;">
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  if (e.parameter.action === 'get') {
+    const data = sheet.getDataRange().getValues();
+    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput('OK');
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data = JSON.parse(e.postData.contents);
+  
+  if (data.action === 'add') {
+    sheet.appendRow([data.date, data.day, data.friends]);
+  }
+  
+  return ContentService.createTextOutput('OK');
+}</textarea>
+                <ol start="6">
+                    <li>Click <strong>Deploy → New deployment</strong></li>
+                    <li>Click gear icon → Select <strong>"Web app"</strong></li>
+                    <li>Description: "Friend Tracker API"</li>
+                    <li>Execute as: <strong>Me</strong></li>
+                    <li>Who has access: <strong>Anyone</strong></li>
+                    <li>Click <strong>Deploy</strong></li>
+                    <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
+                    <li>Paste it below and click Save!</li>
+                </ol>
+            </div>
+
+            <label for="apiUrl">[ Google Apps Script Web App URL ]</label>
+            <input type="text" id="apiUrl" placeholder="https://script.google.com/macros/s/...">
+            <button onclick="saveApiUrl()">[SAVE API URL]</button>
+            <div id="setupStatus"></div>
+        </div>
+
+        <!-- Add Friends -->
+        <div class="input-card" id="friendsCard" class="hidden">
+            <h2>[ ADD YOUR FRIENDS ]</h2>
+            <label for="friendName">Friend Name:</label>
+            <input type="text" id="friendName" placeholder="Enter a friend's name">
+            <button onclick="addFriend()">[+ ADD FRIEND]</button>
+            <div id="friendsList" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Record Attendance -->
+        <div class="input-card hidden" id="attendanceCard">
+            <h2>[ RECORD ATTENDANCE ]</h2>
+            <label for="attendanceDate">Date:</label>
+            <input type="date" id="attendanceDate">
+            
+            <label for="attendanceDay">Day/Game Type:</label>
+            <select id="attendanceDay">
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+                <option value="Game Night">Game Night</option>
+                <option value="Tournament">Tournament</option>
+                <option value="Casual Play">Casual Play</option>
+            </select>
+
+            <label>Who showed up?</label>
+            <div class="friend-checkboxes" id="friendCheckboxes"></div>
+
+            <button onclick="recordAttendance()">[*** RECORD ATTENDANCE ***]</button>
+            <div id="recordStatus"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-card hidden" id="statsCard">
+            <h2>[ EPIC STATS ]</h2>
+            <div class="stats-grid" id="statsGrid"></div>
+            
+            <h2 style="margin-top: 40px;">[ ATTENDANCE HISTORY ]</h2>
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Friends Present</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <hr class="divider">
+    <center>
+        <p style="font-size: 0.8rem;">
+            <b>Best viewed in Netscape Navigator 4.0 or higher</b><br>
+            This page is optimized for 800x600 resolution<br>
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="88" height="31" alt="Made with Notepad" style="border: 1px solid black; background: #C0C0C0;">
+        </p>
+    </center>
+
+    <div class="counter">
+        VISITORS: <span id="visitorCount">000042</span>
+    </div>
+
+    <script>
+        let API_URL = '';
+        let friends = [];
+        let selectedFriends = new Set();
+
+        // Load saved data
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('apiUrl');
+            const savedFriends = localStorage.getItem('friends');
+            
+            if (savedUrl) {
+                API_URL = savedUrl;
+                document.getElementById('apiUrl').value = savedUrl;
+                document.getElementById('friendsCard').classList.remove('hidden');
+            }
+            
+            if (savedFriends) {
+                friends = JSON.parse(savedFriends);
+                renderFriendsList();
+                document.getElementById('attendanceCard').classList.remove('hidden');
+                document.getElementById('statsCard').classList.remove('hidden');
+                renderFriendCheckboxes();
+                loadStats();
+            }
+
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('attendanceDate').value = today;
+        };
+
+        function saveApiUrl() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) {
+                showStatus('setupStatus', 'Please enter a URL!', 'error');
+                return;
+            }
+            
+            API_URL = url;
+            localStorage.setItem('apiUrl', url);
+            showStatus('setupStatus', '[SUCCESS] API URL saved! Now add your friends below.', 'success');
+            document.getElementById('friendsCard').classList.remove('hidden');
+        }
+
+        function addFriend() {
+            const nameInput = document.getElementById('friendName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Enter a name first!');
+                return;
+            }
+            
+            if (friends.includes(name)) {
+                alert('That friend is already in the list!');
+                return;
+            }
+            
+            friends.push(name);
+            localStorage.setItem('friends', JSON.stringify(friends));
+            renderFriendsList();
+            renderFriendCheckboxes();
+            nameInput.value = '';
+            
+            document.getElementById('attendanceCard').classList.remove('hidden');
+            document.getElementById('statsCard').classList.remove('hidden');
+        }
+
+        function removeFriend(name) {
+            if (confirm(`Remove ${name}?`)) {
+                friends = friends.filter(f => f !== name);
+                localStorage.setItem('friends', JSON.stringify(friends));
+                renderFriendsList();
+                renderFriendCheckboxes();
+            }
+        }
+
+        function renderFriendsList() {
+            const list = document.getElementById('friendsList');
+            if (friends.length === 0) {
+                list.innerHTML = '<p style="text-align: center; opacity: 0.6;">No friends added yet!</p>';
+                return;
+            }
+            
+            list.innerHTML = friends.map(friend => `
+                <div class="stat-box" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 1.1rem; font-weight: bold;">${friend}</span>
+                    <button onclick="removeFriend('${friend}')" style="padding: 5px 15px; font-size: 0.9rem;">[X] REMOVE</button>
+                </div>
+            `).join('');
+        }
+
+        function renderFriendCheckboxes() {
+            const container = document.getElementById('friendCheckboxes');
+            container.innerHTML = friends.map(friend => `
+                <div class="friend-checkbox" onclick="toggleFriend('${friend}')" id="checkbox-${friend}">
+                    ${friend}
+                </div>
+            `).join('');
+        }
+
+        function toggleFriend(name) {
+            const checkbox = document.getElementById(`checkbox-${name}`);
+            if (selectedFriends.has(name)) {
+                selectedFriends.delete(name);
+                checkbox.classList.remove('selected');
+            } else {
+                selectedFriends.add(name);
+                checkbox.classList.add('selected');
+            }
+        }
+
+        async function recordAttendance() {
+            const date = document.getElementById('attendanceDate').value;
+            const day = document.getElementById('attendanceDay').value;
+            
+            if (!date) {
+                showStatus('recordStatus', 'Pick a date!', 'error');
+                return;
+            }
+            
+            if (selectedFriends.size === 0) {
+                showStatus('recordStatus', 'Select at least one friend!', 'error');
+                return;
+            }
+            
+            const friendsList = Array.from(selectedFriends).join(', ');
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'add',
+                        date: date,
+                        day: day,
+                        friends: friendsList
+                    })
+                });
+                
+                if (response.ok) {
+                    showStatus('recordStatus', '[SUCCESS] Attendance recorded!', 'success');
+                    selectedFriends.clear();
+                    renderFriendCheckboxes();
+                    loadStats();
+                    incrementVisitorCount();
+                } else {
+                    showStatus('recordStatus', '[ERROR] Failed to record. Check your setup!', 'error');
+                }
+            } catch (error) {
+                showStatus('recordStatus', '[ERROR] ' + error.message, 'error');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(API_URL + '?action=get');
+                const data = await response.json();
+                
+                if (data.length <= 1) {
+                    document.getElementById('statsGrid').innerHTML = '<p>No attendance data yet!</p>';
+                    document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align: center;">No history yet!</td></tr>';
+                    return;
+                }
+                
+                // Skip header row
+                const records = data.slice(1);
+                
+                // Calculate stats
+                const totalSessions = records.length;
+                const friendCounts = {};
+                
+                friends.forEach(friend => {
+                    friendCounts[friend] = 0;
+                });
+                
+                records.forEach(record => {
+                    const attendees = record[2].split(',').map(s => s.trim());
+                    attendees.forEach(attendee => {
+                        if (friendCounts[attendee] !== undefined) {
+                            friendCounts[attendee]++;
+                        }
+                    });
+                });
+                
+                // Find MVP
+                let mvp = { name: 'Nobody', count: 0 };
+                Object.entries(friendCounts).forEach(([name, count]) => {
+                    if (count > mvp.count) {
+                        mvp = { name, count };
+                    }
+                });
+                
+                // Render stats
+                let statsHtml = `
+                    <div class="stat-box">
+                        <div class="stat-number">${totalSessions}</div>
+                        <div class="stat-label">Total Sessions</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${mvp.name}</div>
+                        <div class="stat-label">MVP (Most Attendance)</div>
+                        <div style="margin-top: 10px; font-size: 1.5rem;">${mvp.count} times</div>
+                    </div>
+                `;
+                
+                // Individual friend stats
+                Object.entries(friendCounts).forEach(([name, count]) => {
+                    const percentage = totalSessions > 0 ? Math.round((count / totalSessions) * 100) : 0;
+                    statsHtml += `
+                        <div class="stat-box">
+                            <div class="stat-label">${name}</div>
+                            <div class="stat-number">${count}</div>
+                            <div class="stat-label">${percentage}% Attendance</div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('statsGrid').innerHTML = statsHtml;
+                
+                // Render history (most recent first)
+                const historyHtml = records.reverse().map(record => `
+                    <tr>
+                        <td><strong>${record[0]}</strong></td>
+                        <td>${record[1]}</td>
+                        <td>${record[2]}</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('historyBody').innerHTML = historyHtml;
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const statusDiv = document.getElementById(elementId);
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        function incrementVisitorCount() {
+            const counter = document.getElementById('visitorCount');
+            let count = parseInt(localStorage.getItem('visitorCount') || '42');
+            count++;
+            localStorage.setItem('visitorCount', count.toString());
+            counter.textContent = count.toString().padStart(6, '0');
+        }
+
+        // Initialize visitor count
+        window.addEventListener('load', function() {
+            const count = parseInt(localStorage.getItem('visitorCount') || '42');
+            document.getElementById('visitorCount').textContent = count.toString().padStart(6, '0');
+        });
+    </script>
+</body>
+</html>
