@@ -539,30 +539,28 @@ function doPost(e) {
     </div>
 
     <script>
-        // HARDCODED API URL - Replace this with your actual Google Apps Script URL
-        let API_URL = 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec';
-        // Example: let API_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
+        // HARDCODED API URL - Your Google Apps Script URL
+        const HARDCODED_API_URL = 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec';
+        let API_URL = HARDCODED_API_URL;
         
         let friends = [];
         let selectedFriends = new Set();
 
         // Load saved data
         window.onload = function() {
-            // Check if API_URL is hardcoded, otherwise fall back to localStorage
+            // Use localStorage URL if available, otherwise use hardcoded URL
             const savedUrl = localStorage.getItem('apiUrl');
-            
-            if (API_URL === 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec' && savedUrl) {
-                // If URL isn't hardcoded yet, use saved one from localStorage
+            if (savedUrl) {
                 API_URL = savedUrl;
             }
-            
-            // Update the input fields if we have a URL
-            if (API_URL && API_URL !== 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec') {
+
+            // Update the input fields and load stats if we have a URL
+            if (API_URL) {
                 document.getElementById('apiUrl').value = API_URL;
                 document.getElementById('apiUrlBottom').value = API_URL;
                 document.getElementById('friendsCard').classList.remove('hidden');
-                
-                // Always load stats if we have an API URL
+
+                // Load stats on page load
                 loadStats();
             }
             
@@ -735,7 +733,7 @@ function doPost(e) {
         }
 
         async function loadStats() {
-            if (!API_URL || API_URL === 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec') {
+            if (!API_URL) {
                 document.getElementById('statsGrid').innerHTML = '<p>No API URL configured. Click "Terms of Service" at the bottom to set up.</p>';
                 document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align: center;">No API URL configured</td></tr>';
                 return;
