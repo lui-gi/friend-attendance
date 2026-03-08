@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>*** FRIEND ZONE ATTENDANCE TRACKER ***</title>
+    <title>Friend Zone Attendance Tracker</title>
     <style>
+        :root {
+            --xp-titlebar-start: #0058e7;
+            --xp-titlebar-end: #0040a0;
+            --xp-chrome: #ece9d8;
+            --xp-chrome-dark: #d4d0c8;
+            --xp-input-border: #7f9db9;
+            --xp-taskbar-bg: #245edb;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,321 +21,548 @@
         }
 
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background: #FFFFFF;
-            color: #000000;
-            padding: 20px;
-            background-image: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="white"/><circle cx="50" cy="50" r="1" fill="%23CCCCCC"/></svg>');
+            font-family: Tahoma, 'Segoe UI', Arial, sans-serif;
+            font-size: 11px;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
+        /* ── Desktop ── */
+        #xp-desktop {
+            min-height: 100vh;
+            padding: 16px 16px 46px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: flex-start;
+            background:
+                radial-gradient(ellipse 140% 70% at 50% 120%, #8fd14f 0%, #4a8a28 30%, transparent 65%),
+                linear-gradient(180deg, #1a4fa8 0%, #5ba8e5 45%, #c8e8fa 100%);
+            transition: filter 0.3s, opacity 0.3s;
         }
 
-        .ascii-art {
-            font-family: monospace;
+        #xp-desktop.login-blur {
+            filter: blur(4px) brightness(0.7);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* ── XP Window ── */
+        .xp-window {
+            background: var(--xp-chrome);
+            border: 1px solid #0040a0;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.45), inset 1px 1px 0 #fff;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #win-stats    { flex: 2 1 520px; }
+        #win-attendance { flex: 1 1 320px; }
+
+        .xp-titlebar {
+            background: linear-gradient(180deg, #0058e7 0%, #3a93ff 5%, #1458c8 95%, #0040a0 100%);
+            padding: 4px 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+            border-bottom: 1px solid #003c74;
+        }
+
+        .xp-titlebar-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .xp-titlebar-title {
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0,0,50,0.6);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .xp-win-controls {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .xp-win-btn {
+            width: 21px;
+            height: 21px;
+            border: 1px solid #fff;
+            border-radius: 2px;
             font-size: 10px;
-            line-height: 10px;
-            white-space: pre;
-            color: #0000FF;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        h1 {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 2rem;
-            text-align: center;
-            color: #FF0000;
-            margin-bottom: 10px;
-            font-weight: bold;
-            animation: blink 1.5s step-start infinite;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
-        .divider {
-            border: none;
-            border-top: 2px dashed #000000;
-            margin: 30px 0;
-        }
-
-        .setup-card, .input-card, .stats-card {
-            border: 3px solid #000000;
-            padding: 20px;
-            margin-bottom: 30px;
-            background: #FFFFFF;
-        }
-
-        .setup-card {
-            background: #FFFF00;
-            border: 3px double #000000;
-        }
-
-        .input-card {
-            background: #00FF00;
-            border: 3px ridge #000000;
-        }
-
-        .stats-card {
-            background: #00FFFF;
-            border: 3px groove #000000;
-        }
-
-        h2 {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #000000;
-            text-transform: uppercase;
-            text-decoration: underline;
-            font-weight: bold;
-        }
-
-        .instructions {
-            background: #EEEEEE;
-            padding: 15px;
-            border: 2px solid #000000;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .instructions ol {
-            margin-left: 20px;
-        }
-
-        .instructions li {
-            margin-bottom: 10px;
-        }
-
-        .instructions code {
-            background: #FFFF99;
-            padding: 2px 4px;
-            border: 1px solid #000;
-            font-family: monospace;
-            color: #CC0000;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 1rem;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 8px;
-            font-size: 1rem;
-            border: 2px inset #808080;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 15px;
-            background: #FFFFFF;
-        }
-
-        input:focus, select:focus {
-            outline: 2px solid #0000FF;
-            background: #FFFFCC;
-        }
-
-        button {
-            background: #C0C0C0;
-            color: #000000;
-            border: 2px outset #808080;
-            padding: 8px 20px;
-            font-size: 1rem;
-            font-family: 'Courier New', monospace;
+            line-height: 1;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Marlett', 'Wingdings', Arial, sans-serif;
+            padding: 0;
             font-weight: bold;
-            margin-right: 10px;
+            color: #000;
         }
 
-        button:hover {
-            background: #FFFFFF;
+        .xp-win-btn.minimize {
+            background: linear-gradient(180deg, #e8efff 0%, #b0c8f8 100%);
         }
 
-        button:active {
-            border-style: inset;
+        .xp-win-btn.maximize {
+            background: linear-gradient(180deg, #e8efff 0%, #b0c8f8 100%);
         }
 
-        button:disabled {
-            background: #CCCCCC;
-            cursor: not-allowed;
-            color: #888888;
+        .xp-win-btn.close {
+            background: linear-gradient(180deg, #f05050 0%, #c82828 100%);
+            color: #fff;
         }
 
-        .friend-checkboxes {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
+        .xp-win-btn:hover {
+            filter: brightness(1.1);
         }
 
-        .friend-checkbox {
-            background: #FFFFFF;
-            border: 2px solid #000000;
-            padding: 10px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 1rem;
-            font-weight: bold;
+        .xp-win-btn:active {
+            filter: brightness(0.9);
         }
 
-        .friend-checkbox:hover {
-            background: #FFFF99;
+        .xp-window-body {
+            padding: 12px;
+            background: var(--xp-chrome);
+            overflow: auto;
         }
 
-        .friend-checkbox.selected {
-            background: #FF0000;
-            color: #FFFFFF;
-            border: 2px solid #000000;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: #FFFFFF;
-            border: 2px solid #000000;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-family: 'Courier New', monospace;
-            font-size: 2.5rem;
-            color: #FF0000;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border: 2px solid #000000;
-        }
-
-        .history-table th {
-            background: #000000;
-            color: #00FF00;
-            padding: 10px;
-            text-align: left;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            border: 2px solid #000000;
-        }
-
-        .history-table td {
-            background: #FFFFFF;
-            padding: 10px;
-            border: 1px solid #000000;
-        }
-
-        .history-table tr:nth-child(even) td {
-            background: #EEEEEE;
-        }
-
-        .status {
-            padding: 10px;
-            border: 2px solid #000000;
-            font-weight: bold;
-            display: inline-block;
-            margin: 10px 0;
-        }
-
-        .status.success {
-            background: #00FF00;
-            color: #000000;
-        }
-
-        .status.error {
-            background: #FF0000;
-            color: #FFFFFF;
-        }
-
-        .status.info {
-            background: #00FFFF;
-            color: #000000;
-        }
-
-        .hidden {
+        .xp-window.minimized .xp-window-body {
             display: none;
         }
 
-        .loading {
-            display: inline-block;
+        /* ── Fieldset / group box ── */
+        .xp-group {
+            border: 1px solid #9a9a9a;
+            padding: 8px 10px 10px;
+            margin-bottom: 10px;
+            background: var(--xp-chrome);
+        }
+
+        .xp-group legend {
+            font-weight: bold;
+            padding: 0 4px;
+            font-size: 11px;
+        }
+
+        /* ── Labels ── */
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+
+        /* ── Inputs / Selects ── */
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 3px 5px;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+            background: #fff;
+            border-top: 2px solid #7f9db9;
+            border-left: 2px solid #7f9db9;
+            border-bottom: 2px solid #c8d8ea;
+            border-right: 2px solid #c8d8ea;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: 1px solid #316ac5;
+        }
+
+        /* ── Standard XP button ── */
+        .xp-btn {
+            background: linear-gradient(180deg, #f0f4fc 0%, #ccdcf8 50%, #b8d0f8 100%);
+            color: #000;
+            border: 1px solid #003c74;
+            border-radius: 3px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+            min-width: 75px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .xp-btn:hover {
+            background: linear-gradient(180deg, #f8fbff 0%, #deeaff 50%, #ccdcff 100%);
+        }
+
+        .xp-btn:active {
+            background: linear-gradient(180deg, #b8d0f8 0%, #ccdcf8 100%);
+        }
+
+        .xp-btn:disabled {
+            background: #d9d9d9;
+            color: #adadad;
+            cursor: not-allowed;
+            border-color: #b0b0b0;
+        }
+
+        /* Primary blue button */
+        .xp-btn-primary {
+            background: linear-gradient(180deg, #4d9cf0 0%, #2878d8 50%, #1c60c8 100%);
+            color: #fff;
+            border-color: #0040a0;
             font-weight: bold;
         }
 
-        .counter {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: #FFFF00;
-            border: 2px solid #000000;
+        .xp-btn-primary:hover:not(:disabled) {
+            background: linear-gradient(180deg, #5aabff 0%, #3a88e8 50%, #2870d8 100%);
+        }
+
+        .xp-btn-primary:active:not(:disabled) {
+            background: linear-gradient(180deg, #1c60c8 0%, #2878d8 100%);
+        }
+
+        /* ── Friend checkboxes ── */
+        /* ── Stats grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-box {
+            background: #fff;
+            border: 1px solid #9a9a9a;
             padding: 10px;
-            font-family: monospace;
+            text-align: center;
+            border-radius: 2px;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            color: #316ac5;
+            font-weight: bold;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            margin-top: 4px;
+            color: #444;
+        }
+
+        /* ── History table ── */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 11px;
+        }
+
+        .history-table th {
+            background: linear-gradient(180deg, #e8eef8 0%, #d0d8f0 100%);
+            color: #000;
+            padding: 4px 8px;
+            text-align: left;
+            border: 1px solid #9a9a9a;
             font-weight: bold;
         }
 
-        a {
-            color: #0000FF;
-            text-decoration: underline;
+        .history-table td {
+            background: #fff;
+            padding: 4px 8px;
+            border: 1px solid #d4d0c8;
         }
 
-        a:visited {
-            color: #800080;
+        .history-table tr:nth-child(even) td {
+            background: #f0f4ff;
         }
 
-        a:hover {
-            color: #FF0000;
+        .history-table tr:hover td {
+            background: #dde8ff;
+        }
+
+        /* ── Status messages ── */
+        .hidden { display: none !important; }
+
+        .status {
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 6px 0;
+            border-radius: 2px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* ── Instructions ── */
+        .instructions {
+            background: #fafafa;
+            border: 1px solid #9a9a9a;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            font-size: 10px;
+            line-height: 1.6;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .instructions ol {
+            margin-left: 16px;
+        }
+
+        .instructions li {
+            margin-bottom: 4px;
+        }
+
+        .instructions code {
+            background: #fff8c4;
+            padding: 1px 3px;
+            border: 1px solid #c8a800;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+        }
+
+        .troubleshoot {
+            background: #fff0f0;
+            border: 1px solid #e0a0a0;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 10px;
+        }
+
+        .troubleshoot ul {
+            margin-left: 14px;
+        }
+
+        /* ── Taskbar ── */
+        #xp-taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(180deg, #245edb 0%, #1a4fc0 50%, #1448b0 100%);
+            border-top: 1px solid #1a3ea0;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            gap: 3px;
+            z-index: 1000;
+        }
+
+        /* Start button */
+        #xp-start-btn {
+            height: 24px;
+            padding: 0 10px 0 6px;
+            background: linear-gradient(180deg, #5db544 0%, #3ca028 50%, #30a020 100%);
+            border: 1px solid #208010;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 12px;
+            font-style: italic;
+            font-weight: bold;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-right: 4px;
+        }
+
+        #xp-start-btn:hover {
+            background: linear-gradient(180deg, #6ec855 0%, #4ab030 50%, #38b428 100%);
+        }
+
+        #xp-start-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Taskbar window buttons */
+        .taskbar-win-btn {
+            height: 22px;
+            padding: 0 8px;
+            background: linear-gradient(180deg, #4a7ae8 0%, #3060c8 100%);
+            border: 1px solid #1448a0;
+            border-radius: 2px;
+            color: #fff;
+            font-size: 10px;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            max-width: 140px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .taskbar-win-btn:hover {
+            background: linear-gradient(180deg, #5a8af8 0%, #4070d8 100%);
+        }
+
+        .taskbar-win-btn.active {
+            background: linear-gradient(180deg, #2050b8 0%, #3060c8 100%);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Systray */
+        #xp-systray {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(180deg, #1448b0 0%, #1040a8 100%);
+            border: 1px solid #1030a0;
+            border-radius: 2px;
+            padding: 0 8px;
+            height: 22px;
+            color: #fff;
+            font-size: 11px;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        /* ── Login overlay ── */
+        #xp-login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        #win-login {
+            width: 400px;
+            max-width: 96vw;
+        }
+
+        .xp-login-body {
+            padding: 16px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .xp-login-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .xp-login-icon {
+            font-size: 38px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .xp-login-text {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .xp-login-text strong {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        #xp-login-error {
+            color: #cc0000;
+            font-size: 11px;
+            min-height: 16px;
+        }
+
+        .xp-login-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            border-top: 1px solid var(--xp-chrome-dark);
+            padding-top: 10px;
+            margin-top: 4px;
+        }
+
+        /* Separator in taskbar */
+        .taskbar-sep {
+            width: 1px;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            margin: 0 2px;
+        }
+
+        h2 {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        a { color: #316ac5; }
+        a:visited { color: #7030a0; }
+
+        textarea[readonly] {
+            height: 130px;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            resize: vertical;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="ascii-art">
-  _____ ____  ___ _____ _   _ ____  
- |  ___|  _ \|_ _| ____| \ | |  _ \ 
- | |_  | |_) || ||  _| |  \| | | | |
- |  _| |  _ < | || |___| |\  | |_| |
- |_|   |_| \_\___|_____|_| \_|____/ 
-                                     
-    _  _____ _____ _____ _   _ ____   _    _   _  ____ _____ 
-   / \|_   _|_   _| ____| \ | |  _ \ / \  | \ | |/ ___| ____|
-  / _ \ | |   | | |  _| |  \| | | | / _ \ |  \| | |   |  _|  
- / ___ \| |   | | | |___| |\  | |_| / ___ \| |\  | |___| |___ 
-/_/   \_\_|   |_| |_____|_| \_|____/_/   \_\_| \_|\____|_____|
+
+<!-- ══════════════════ DESKTOP ══════════════════ -->
+<div id="xp-desktop" class="login-blur">
+
+    <!-- Stats Window -->
+    <div class="xp-window" id="win-stats">
+        <div class="xp-titlebar">
+            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1" fill="#fff" opacity=".9"/><rect x="1" y="3" width="14" height="3" rx="1" fill="#4a90e2"/><circle cx="12" cy="11" r="2" fill="#60c060"/></svg>
+            <span class="xp-titlebar-title">Friend Zone Attendance Tracker</span>
+            <div class="xp-win-controls">
+                <button class="xp-win-btn minimize" onclick="xpMinimize('win-stats')" title="Minimize">−</button>
+                <button class="xp-win-btn maximize" onclick="xpMaximize('win-stats')" title="Maximize">□</button>
+                <button class="xp-win-btn close" onclick="xpClose('win-stats', 'btn-stats')" title="Close">✕</button>
+            </div>
         </div>
+        <div class="xp-window-body">
+            <h2>Epic Stats</h2>
+            <div class="stats-grid" id="statsGrid">
+                <p style="color:#666; font-size:11px;">Loading stats…</p>
+            </div>
 
-        <h1>*** FRIEND ZONE TRACKER ***</h1>
-        
-        <center>
-            <p><marquee width="80%" behavior="alternate">Welcome to the OFFICIAL Friend Attendance Tracking System!</marquee></p>
-            <p>[ Last Updated: <script>document.write(new Date().toLocaleDateString());</script> ]</p>
-        </center>
-        
-        <hr class="divider">
-
-        <!-- Stats -->
-        <div class="stats-card" id="statsCard">
-            <h2>[ EPIC STATS ]</h2>
-            <div class="stats-grid" id="statsGrid"></div>
-            
-            <h2 style="margin-top: 40px;">[ ATTENDANCE HISTORY ]</h2>
+            <h2 style="margin-top:12px;">Attendance History</h2>
             <table class="history-table" id="historyTable">
                 <thead>
                     <tr>
@@ -338,521 +574,367 @@
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
+    </div>
 
-        <hr class="divider">
+    <!-- Attendance Window -->
+    <div class="xp-window" id="win-attendance">
+        <div class="xp-titlebar">
+            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="12" rx="1" fill="#fff" opacity=".9"/><rect x="1" y="2" width="14" height="3" rx="1" fill="#e06040"/><rect x="4" y="7" width="2" height="2" fill="#316ac5"/><rect x="7" y="7" width="2" height="2" fill="#316ac5"/><rect x="10" y="7" width="2" height="2" fill="#316ac5"/><rect x="4" y="10" width="2" height="2" fill="#316ac5"/><rect x="7" y="10" width="2" height="2" fill="#316ac5"/></svg>
+            <span class="xp-titlebar-title">Record Attendance</span>
+            <div class="xp-win-controls">
+                <button class="xp-win-btn minimize" onclick="xpMinimize('win-attendance')" title="Minimize">−</button>
+                <button class="xp-win-btn maximize" onclick="xpMaximize('win-attendance')" title="Maximize">□</button>
+                <button class="xp-win-btn close" onclick="xpClose('win-attendance', 'btn-attendance')" title="Close">✕</button>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <div class="xp-group">
+                <legend>Session Details</legend>
+                <label for="attendanceDate">Date:</label>
+                <input type="date" id="attendanceDate">
 
-        <!-- Setup Instructions -->
-        <div class="setup-card hidden" id="setupCard">
-            <h2>[ SETUP INSTRUCTIONS ]</h2>
-            <div class="instructions">
-                <ol>
-                    <li>Create a new Google Sheet: <a href="https://sheets.new" target="_blank">sheets.new</a></li>
-                    <li>Name it whatever you want (e.g., "Friend Attendance")</li>
-                    <li>Add these column headers in Row 1:
-                        <br><code>Date | Day | Friends</code>
-                    </li>
-                    <li>Go to <strong>Extensions → Apps Script</strong></li>
-                    <li>Delete any code there and paste this:</li>
-                </ol>
-                <textarea readonly style="width: 100%; height: 200px; font-family: monospace; padding: 10px; margin: 10px 0;">
-function doGet(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  if (e.parameter.action === 'get') {
-    const data = sheet.getDataRange().getValues();
-    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  return ContentService.createTextOutput('OK');
-}
-
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const data = JSON.parse(e.postData.contents);
-  
-  if (data.action === 'add') {
-    sheet.appendRow([data.date, data.day, data.friends]);
-  }
-  
-  return ContentService.createTextOutput('OK');
-}</textarea>
-                <ol start="6">
-                    <li>Click <strong>Deploy → New deployment</strong></li>
-                    <li>Click gear icon → Select <strong>"Web app"</strong></li>
-                    <li>Description: "Friend Tracker API"</li>
-                    <li>Execute as: <strong>Me</strong></li>
-                    <li>Who has access: <strong>Anyone</strong></li>
-                    <li>Click <strong>Deploy</strong></li>
-                    <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
-                    <li>Paste it below and click Save!</li>
-                </ol>
-                
-                <div style="background: #FFE4E4; border: 2px solid #FF0000; padding: 15px; margin-top: 15px;">
-                    <b>TROUBLESHOOTING:</b>
-                    <ul>
-                        <li>If you get "[ERROR] Failed to fetch" - make sure you set "Who has access" to <b>Anyone</b></li>
-                        <li>After deploying, you may need to authorize the script (Google will show a scary warning - click "Advanced" then "Go to [project name]")</li>
-                        <li>If you update the Apps Script code, you need to create a NEW deployment (not edit the old one)</li>
-                        <li>The URL should end with /exec NOT /dev</li>
-                        <li>Test the URL by pasting it in your browser - it should say "OK"</li>
-                    </ul>
-                </div>
+                <label for="attendanceDay">Day / Game Type:</label>
+                <select id="attendanceDay">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
             </div>
 
-            <label for="apiUrl">[ Google Apps Script Web App URL ]</label>
-            <input type="text" id="apiUrl" placeholder="https://script.google.com/macros/s/...">
-            <button onclick="saveApiUrl()">[SAVE API URL]</button>
-            <div id="setupStatus"></div>
-        </div>
+            <div class="xp-group">
+                <legend>Attendee</legend>
+                <p style="font-size:11px;">Currently logged in as: <strong id="loggedInName"></strong></p>
+            </div>
 
-        <!-- Add Friends -->
-        <div class="input-card" id="friendsCard" class="hidden">
-            <h2>[ ADD YOUR FRIENDS ]</h2>
-            <label for="friendName">Friend Name:</label>
-            <input type="text" id="friendName" placeholder="Enter a friend's name">
-            <button onclick="addFriend()">[+ ADD FRIEND]</button>
-            <div id="friendsList" style="margin-top: 20px;"></div>
-        </div>
-
-        <!-- Record Attendance -->
-        <div class="input-card hidden" id="attendanceCard">
-            <h2>[ RECORD ATTENDANCE ]</h2>
-            <label for="attendanceDate">Date:</label>
-            <input type="date" id="attendanceDate">
-            
-            <label for="attendanceDay">Day/Game Type:</label>
-            <select id="attendanceDay">
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-                <option value="Sunday">Sunday</option>
-            </select>
-
-            <label>Who showed up?</label>
-            <div class="friend-checkboxes" id="friendCheckboxes"></div>
-
-            <button onclick="recordAttendance()">[*** RECORD ATTENDANCE ***]</button>
+            <button class="xp-btn xp-btn-primary" onclick="recordAttendance()">Record Attendance</button>
             <div id="recordStatus"></div>
         </div>
     </div>
 
-    <hr class="divider">
-    
-    <center>
-        <p style="font-size: 0.8rem;">
-            <b>Best viewed in Netscape Navigator 4.0 or higher</b><br>
-            This page is optimized for 800x600 resolution<br>
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="88" height="31" alt="Made with Notepad" style="border: 1px solid black; background: #C0C0C0;">
-        </p>
-        <p style="font-size: 0.7rem; color: #666; margin-top: 10px;">
-            <a href="#" onclick="toggleSetup(event)" style="color: #666; text-decoration: none;">Terms of Service</a> | 
-            <a href="#" style="color: #666;">Privacy Policy</a> | 
-            <a href="#" style="color: #666;">Contact</a>
-        </p>
-    </center>
 
-    <div id="hiddenSetup" class="hidden" style="max-width: 900px; margin: 20px auto; text-align: left; border: 2px solid #000000; padding: 20px; background: #FFFF00;">
-        <h3 style="margin-bottom: 15px;">[ API SETUP ]</h3>
-        
-        <label for="apiUrlBottom">[ Google Apps Script Web App URL ]</label>
-        <input type="text" id="apiUrlBottom" placeholder="https://script.google.com/macros/s/...">
-        <button onclick="saveApiUrlBottom()">[SAVE API URL]</button>
-        <button onclick="toggleSetup(event)" style="background: #FF0000; color: white;">[CLOSE]</button>
-        <div id="setupStatusBottom"></div>
-        
-        <hr style="margin: 20px 0; border: 1px dashed #000;">
-        
-        <h3 style="margin-bottom: 15px;">[ FULL SETUP INSTRUCTIONS ]</h3>
-        <div class="instructions">
-            <ol>
-                <li>Create a new Google Sheet: <a href="https://sheets.new" target="_blank">sheets.new</a></li>
-                <li>Name it whatever you want (e.g., "Friend Attendance")</li>
-                <li>Add these column headers in Row 1:
-                    <br><code>Date | Day | Friends</code>
-                </li>
-                <li>Go to <strong>Extensions → Apps Script</strong></li>
-                <li>Delete any code there and paste this:</li>
-            </ol>
-            <textarea readonly style="width: 100%; height: 200px; font-family: monospace; padding: 10px; margin: 10px 0;">
-function doGet(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  if (e.parameter.action === 'get') {
-    const data = sheet.getDataRange().getValues();
-    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  return ContentService.createTextOutput('OK');
-}
+</div><!-- /#xp-desktop -->
 
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const data = JSON.parse(e.postData.contents);
-  
-  if (data.action === 'add') {
-    sheet.appendRow([data.date, data.day, data.friends]);
-  }
-  
-  return ContentService.createTextOutput('OK');
-}</textarea>
-            <ol start="6">
-                <li>Click <strong>Deploy → New deployment</strong></li>
-                <li>Click gear icon → Select <strong>"Web app"</strong></li>
-                <li>Description: "Friend Tracker API"</li>
-                <li>Execute as: <strong>Me</strong></li>
-                <li>Who has access: <strong>Anyone</strong></li>
-                <li>Click <strong>Deploy</strong></li>
-                <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
-                <li>Paste it in the field above and click Save!</li>
-            </ol>
-            
-            <div style="background: #FFE4E4; border: 2px solid #FF0000; padding: 15px; margin-top: 15px;">
-                <b>TROUBLESHOOTING:</b>
-                <ul>
-                    <li>If you get "[ERROR] Failed to fetch" - make sure you set "Who has access" to <b>Anyone</b></li>
-                    <li>After deploying, you may need to authorize the script (Google will show a scary warning - click "Advanced" then "Go to [project name]")</li>
-                    <li>If you update the Apps Script code, you need to create a NEW deployment (not edit the old one)</li>
-                    <li>The URL should end with /exec NOT /dev</li>
-                    <li>Test the URL by pasting it in your browser - it should say "OK"</li>
-                </ul>
+
+<!-- ══════════════════ TASKBAR ══════════════════ -->
+<div id="xp-taskbar">
+    <button id="xp-start-btn">
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="6.5" height="6.5" fill="#f25022"/>
+            <rect x="8.5" y="1" width="6.5" height="6.5" fill="#7fba00"/>
+            <rect x="1" y="8.5" width="6.5" height="6.5" fill="#00a4ef"/>
+            <rect x="8.5" y="8.5" width="6.5" height="6.5" fill="#ffb900"/>
+        </svg>
+        start
+    </button>
+    <div class="taskbar-sep"></div>
+    <button class="taskbar-win-btn active" id="btn-stats" onclick="xpRestore('win-stats', 'btn-stats')">
+        📊 Stats
+    </button>
+    <button class="taskbar-win-btn active" id="btn-attendance" onclick="xpRestore('win-attendance', 'btn-attendance')">
+        📅 Attendance
+    </button>
+    <div id="xp-systray">
+        <span id="xp-clock">00:00</span>
+    </div>
+</div>
+
+
+<!-- ══════════════════ LOGIN OVERLAY ══════════════════ -->
+<div id="xp-login-overlay">
+    <div class="xp-window" id="win-login">
+        <div class="xp-titlebar">
+            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1" fill="#fff" opacity=".8"/><text x="8" y="11" text-anchor="middle" font-size="8" fill="#316ac5" font-weight="bold">?</text></svg>
+            <span class="xp-titlebar-title">Terminal</span>
+            <div class="xp-win-controls">
+                <button class="xp-win-btn close" onclick="submitTerminalName()" title="Close">✕</button>
+            </div>
+        </div>
+        <div class="xp-login-body">
+            <div class="xp-login-header">
+                <div class="xp-login-icon">👤</div>
+                <div class="xp-login-text">
+                    <strong>Welcome to Friend Zone Attendance Tracker</strong>
+                    Please enter your name to continue. Your name will be added to the friends list automatically.
+                </div>
+            </div>
+            <div>
+                <label for="terminalNameInput">Name:</label>
+                <input type="text" id="terminalNameInput" autocomplete="off" spellcheck="false" placeholder="Enter your name…">
+                <div id="terminalError" style="color:#cc0000; font-size:11px; min-height:14px;"></div>
+            </div>
+            <div class="xp-login-actions">
+                <button id="confirmBtn" class="xp-btn xp-btn-primary" disabled onclick="submitTerminalName()">Confirm</button>
+                <button class="xp-btn" onclick="submitTerminalName()">Cancel</button>
             </div>
         </div>
     </div>
+</div>
 
-    <hr class="divider">
-    <center>
-        <p style="font-size: 0.8rem;">
-            <b>Best viewed in Netscape Navigator 4.0 or higher</b><br>
-            This page is optimized for 800x600 resolution<br>
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="88" height="31" alt="Made with Notepad" style="border: 1px solid black; background: #C0C0C0;">
-        </p>
-    </center>
 
-    <div class="counter">
-        VISITORS: <span id="visitorCount">000042</span>
-    </div>
+<script>
+    // HARDCODED API URL - Your Google Apps Script URL
+    const HARDCODED_API_URL = 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec';
+    let API_URL = HARDCODED_API_URL;
 
-    <script>
-        // HARDCODED API URL - Your Google Apps Script URL
-        const HARDCODED_API_URL = 'https://script.google.com/macros/s/AKfycbwSDYjgueoI6VdBW5dvaqXEFVUGifYgvpQeWY9VPYpX0dGdeMlRs-w0rkv0cWTzWils/exec';
-        let API_URL = HARDCODED_API_URL;
-        
-        let friends = [];
-        let selectedFriends = new Set();
+    let currentUser = '';
 
-        // Load saved data
-        window.onload = function() {
-            // Use localStorage URL if available, otherwise use hardcoded URL
-            const savedUrl = localStorage.getItem('apiUrl');
-            if (savedUrl) {
-                API_URL = savedUrl;
-            }
+    // Load saved data
+    window.onload = function() {
+        document.getElementById('xp-desktop').classList.add('login-blur');
 
-            // Update the input fields and load stats if we have a URL
-            if (API_URL) {
-                document.getElementById('apiUrl').value = API_URL;
-                document.getElementById('apiUrlBottom').value = API_URL;
-                document.getElementById('friendsCard').classList.remove('hidden');
+        // Use localStorage URL if available, otherwise use hardcoded URL
+        const savedUrl = localStorage.getItem('apiUrl');
+        if (savedUrl) {
+            API_URL = savedUrl;
+        }
 
-                // Load stats on page load
+        // Load stats on page load
+        if (API_URL) {
+            loadStats();
+        }
+
+        // Set today's date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('attendanceDate').value = today;
+    };
+
+    async function recordAttendance() {
+        const date = document.getElementById('attendanceDate').value;
+        const day = document.getElementById('attendanceDay').value;
+
+        if (!date) {
+            showStatus('recordStatus', 'Pick a date!', 'error');
+            return;
+        }
+
+        const friendsList = currentUser;
+
+        showStatus('recordStatus', 'Sending… Please wait.', 'info');
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // This helps with CORS issues
+                body: JSON.stringify({
+                    action: 'add',
+                    date: date,
+                    day: day,
+                    friends: friendsList
+                })
+            });
+
+            // Note: with no-cors mode, we can't read the response, so we assume success
+            showStatus('recordStatus', 'Attendance recorded successfully!', 'success');
+
+            // Wait a moment then reload stats
+            setTimeout(() => {
                 loadStats();
-            }
-            
-            const savedFriends = localStorage.getItem('friends');
-            if (savedFriends) {
-                friends = JSON.parse(savedFriends);
-                renderFriendsList();
-                document.getElementById('attendanceCard').classList.remove('hidden');
-                renderFriendCheckboxes();
-            }
+            }, 1000);
 
-            // Set today's date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('attendanceDate').value = today;
-        };
+        } catch (error) {
+            showStatus('recordStatus', 'Failed to fetch — check Setup window. Error: ' + error.message, 'error');
+            console.error('Full error:', error);
+        }
+    }
 
-        function saveApiUrl() {
-            const url = document.getElementById('apiUrl').value.trim();
-            if (!url) {
-                showStatus('setupStatus', 'Please enter a URL!', 'error');
+    async function loadStats() {
+        if (!API_URL) {
+            document.getElementById('statsGrid').innerHTML = '<p style="font-size:11px; color:#666;">No API URL configured. Use the Setup window.</p>';
+            document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align:center;">No API URL configured</td></tr>';
+            return;
+        }
+
+        try {
+            const response = await fetch(API_URL + '?action=get');
+
+            if (!response.ok) {
+                console.error('Stats fetch failed:', response.status);
+                document.getElementById('statsGrid').innerHTML = '<p style="color:red; font-size:11px;">Could not load stats. Check your API setup.</p>';
                 return;
             }
-            
-            API_URL = url;
-            localStorage.setItem('apiUrl', url);
-            showStatus('setupStatus', '[SUCCESS] API URL saved! Now add your friends below.', 'success');
-            document.getElementById('friendsCard').classList.remove('hidden');
-        }
 
-        function saveApiUrlBottom() {
-            const url = document.getElementById('apiUrlBottom').value.trim();
-            if (!url) {
-                showStatus('setupStatusBottom', 'Please enter a URL!', 'error');
+            const data = await response.json();
+
+            if (data.length <= 1) {
+                document.getElementById('statsGrid').innerHTML = '<p style="font-size:11px; color:#666;">No attendance data yet!</p>';
+                document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align:center;">No history yet!</td></tr>';
                 return;
             }
-            
-            API_URL = url;
-            localStorage.setItem('apiUrl', url);
-            document.getElementById('apiUrl').value = url;
-            document.getElementById('apiUrlBottom').value = url;
-            showStatus('setupStatusBottom', '[SUCCESS] API URL saved!', 'success');
-            document.getElementById('friendsCard').classList.remove('hidden');
-            document.getElementById('attendanceCard').classList.remove('hidden');
-            loadStats(); // Load stats immediately after saving API URL
-        }
 
-        function toggleSetup(event) {
-            event.preventDefault();
-            const setupDiv = document.getElementById('hiddenSetup');
-            setupDiv.classList.toggle('hidden');
-            if (!setupDiv.classList.contains('hidden')) {
-                setupDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }
+            // Skip header row
+            const records = data.slice(1);
 
-        function addFriend() {
-            const nameInput = document.getElementById('friendName');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                alert('Enter a name first!');
-                return;
-            }
-            
-            if (friends.includes(name)) {
-                alert('That friend is already in the list!');
-                return;
-            }
-            
-            friends.push(name);
-            localStorage.setItem('friends', JSON.stringify(friends));
-            renderFriendsList();
-            renderFriendCheckboxes();
-            nameInput.value = '';
-            
-            document.getElementById('attendanceCard').classList.remove('hidden');
-            document.getElementById('statsCard').classList.remove('hidden');
-        }
+            // Calculate stats - collect ALL unique friends from the sheet data
+            const totalSessions = records.length;
+            const friendCounts = {};
 
-        function removeFriend(name) {
-            if (confirm(`Remove ${name}?`)) {
-                friends = friends.filter(f => f !== name);
-                localStorage.setItem('friends', JSON.stringify(friends));
-                renderFriendsList();
-                renderFriendCheckboxes();
-            }
-        }
-
-        function renderFriendsList() {
-            const list = document.getElementById('friendsList');
-            if (friends.length === 0) {
-                list.innerHTML = '<p style="text-align: center; opacity: 0.6;">No friends added yet!</p>';
-                return;
-            }
-            
-            list.innerHTML = friends.map(friend => `
-                <div class="stat-box" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-size: 1.1rem; font-weight: bold;">${friend}</span>
-                    <button onclick="removeFriend('${friend}')" style="padding: 5px 15px; font-size: 0.9rem;">[X] REMOVE</button>
-                </div>
-            `).join('');
-        }
-
-        function renderFriendCheckboxes() {
-            const container = document.getElementById('friendCheckboxes');
-            container.innerHTML = friends.map(friend => `
-                <div class="friend-checkbox" onclick="toggleFriend('${friend}')" id="checkbox-${friend}">
-                    ${friend}
-                </div>
-            `).join('');
-        }
-
-        function toggleFriend(name) {
-            const checkbox = document.getElementById(`checkbox-${name}`);
-            if (selectedFriends.has(name)) {
-                selectedFriends.delete(name);
-                checkbox.classList.remove('selected');
-            } else {
-                selectedFriends.add(name);
-                checkbox.classList.add('selected');
-            }
-        }
-
-        async function recordAttendance() {
-            const date = document.getElementById('attendanceDate').value;
-            const day = document.getElementById('attendanceDay').value;
-            
-            if (!date) {
-                showStatus('recordStatus', 'Pick a date!', 'error');
-                return;
-            }
-            
-            if (selectedFriends.size === 0) {
-                showStatus('recordStatus', 'Select at least one friend!', 'error');
-                return;
-            }
-            
-            const friendsList = Array.from(selectedFriends).join(', ');
-            
-            showStatus('recordStatus', '[SENDING...] Please wait...', 'info');
-            
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // This helps with CORS issues
-                    body: JSON.stringify({
-                        action: 'add',
-                        date: date,
-                        day: day,
-                        friends: friendsList
-                    })
-                });
-                
-                // Note: with no-cors mode, we can't read the response, so we assume success
-                showStatus('recordStatus', '[SUCCESS] Attendance recorded!', 'success');
-                selectedFriends.clear();
-                renderFriendCheckboxes();
-                
-                // Wait a moment then reload stats
-                setTimeout(() => {
-                    loadStats();
-                }, 1000);
-                
-                incrementVisitorCount();
-                
-            } catch (error) {
-                showStatus('recordStatus', '[ERROR] Failed to fetch - Check setup instructions above! Error: ' + error.message, 'error');
-                console.error('Full error:', error);
-            }
-        }
-
-        async function loadStats() {
-            if (!API_URL) {
-                document.getElementById('statsGrid').innerHTML = '<p>No API URL configured. Click "Terms of Service" at the bottom to set up.</p>';
-                document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align: center;">No API URL configured</td></tr>';
-                return;
-            }
-            
-            try {
-                const response = await fetch(API_URL + '?action=get');
-                
-                if (!response.ok) {
-                    console.error('Stats fetch failed:', response.status);
-                    document.getElementById('statsGrid').innerHTML = '<p style="color: red;">[ERROR] Could not load stats. Check your API setup!</p>';
-                    return;
-                }
-                
-                const data = await response.json();
-                
-                if (data.length <= 1) {
-                    document.getElementById('statsGrid').innerHTML = '<p>No attendance data yet!</p>';
-                    document.getElementById('historyBody').innerHTML = '<tr><td colspan="3" style="text-align: center;">No history yet!</td></tr>';
-                    return;
-                }
-                
-                // Skip header row
-                const records = data.slice(1);
-                
-                // Calculate stats - collect ALL unique friends from the sheet data
-                const totalSessions = records.length;
-                const friendCounts = {};
-                
-                // First pass: collect all unique friend names from the sheet
-                records.forEach(record => {
-                    const attendees = record[2].split(',').map(s => s.trim());
-                    attendees.forEach(attendee => {
-                        if (attendee && !friendCounts[attendee]) {
-                            friendCounts[attendee] = 0;
-                        }
-                    });
-                });
-                
-                // Second pass: count attendance
-                records.forEach(record => {
-                    const attendees = record[2].split(',').map(s => s.trim());
-                    attendees.forEach(attendee => {
-                        if (attendee && friendCounts[attendee] !== undefined) {
-                            friendCounts[attendee]++;
-                        }
-                    });
-                });
-                
-                // Find MVP
-                let mvp = { name: 'Nobody', count: 0 };
-                Object.entries(friendCounts).forEach(([name, count]) => {
-                    if (count > mvp.count) {
-                        mvp = { name, count };
+            // First pass: collect all unique friend names from the sheet
+            records.forEach(record => {
+                const attendees = record[2].split(',').map(s => s.trim());
+                attendees.forEach(attendee => {
+                    if (attendee && !friendCounts[attendee]) {
+                        friendCounts[attendee] = 0;
                     }
                 });
-                
-                // Render stats
-                let statsHtml = `
+            });
+
+            // Second pass: count attendance
+            records.forEach(record => {
+                const attendees = record[2].split(',').map(s => s.trim());
+                attendees.forEach(attendee => {
+                    if (attendee && friendCounts[attendee] !== undefined) {
+                        friendCounts[attendee]++;
+                    }
+                });
+            });
+
+            // Find MVP
+            let mvp = { name: 'Nobody', count: 0 };
+            Object.entries(friendCounts).forEach(([name, count]) => {
+                if (count > mvp.count) {
+                    mvp = { name, count };
+                }
+            });
+
+            // Render stats
+            let statsHtml = `
+                <div class="stat-box">
+                    <div class="stat-number">${totalSessions}</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" style="font-size:1.2rem;">${mvp.name}</div>
+                    <div class="stat-label">MVP (Most Attendance)</div>
+                    <div style="margin-top:4px; font-size:1rem; color:#316ac5; font-weight:bold;">${mvp.count} times</div>
+                </div>
+            `;
+
+            // Individual friend stats - shows ALL friends from sheet data
+            Object.entries(friendCounts).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
+                const percentage = totalSessions > 0 ? Math.round((count / totalSessions) * 100) : 0;
+                statsHtml += `
                     <div class="stat-box">
-                        <div class="stat-number">${totalSessions}</div>
-                        <div class="stat-label">Total Sessions</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number">${mvp.name}</div>
-                        <div class="stat-label">MVP (Most Attendance)</div>
-                        <div style="margin-top: 10px; font-size: 1.5rem;">${mvp.count} times</div>
+                        <div class="stat-label" style="font-weight:bold;">${name}</div>
+                        <div class="stat-number">${count}</div>
+                        <div class="stat-label">${percentage}% Attendance</div>
                     </div>
                 `;
-                
-                // Individual friend stats - now shows ALL friends from sheet data
-                Object.entries(friendCounts).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
-                    const percentage = totalSessions > 0 ? Math.round((count / totalSessions) * 100) : 0;
-                    statsHtml += `
-                        <div class="stat-box">
-                            <div class="stat-label">${name}</div>
-                            <div class="stat-number">${count}</div>
-                            <div class="stat-label">${percentage}% Attendance</div>
-                        </div>
-                    `;
-                });
-                
-                document.getElementById('statsGrid').innerHTML = statsHtml;
-                
-                // Render history (most recent first)
-                const historyHtml = records.reverse().map(record => `
-                    <tr>
-                        <td><strong>${record[0]}</strong></td>
-                        <td>${record[1]}</td>
-                        <td>${record[2]}</td>
-                    </tr>
-                `).join('');
-                
-                document.getElementById('historyBody').innerHTML = historyHtml;
-                
-            } catch (error) {
-                console.error('Error loading stats:', error);
-                document.getElementById('statsGrid').innerHTML = `<p style="color: red;">[ERROR] ${error.message}<br>Make sure your Google Apps Script is deployed correctly!</p>`;
-            }
-        }
+            });
 
-        function showStatus(elementId, message, type) {
-            const statusDiv = document.getElementById(elementId);
-            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 5000);
-        }
+            document.getElementById('statsGrid').innerHTML = statsHtml;
 
-        function incrementVisitorCount() {
-            const counter = document.getElementById('visitorCount');
-            let count = parseInt(localStorage.getItem('visitorCount') || '42');
-            count++;
-            localStorage.setItem('visitorCount', count.toString());
-            counter.textContent = count.toString().padStart(6, '0');
-        }
+            // Render history (most recent first)
+            const historyHtml = records.reverse().map(record => `
+                <tr>
+                    <td><strong>${record[0]}</strong></td>
+                    <td>${record[1]}</td>
+                    <td>${record[2]}</td>
+                </tr>
+            `).join('');
 
-        // Initialize visitor count
-        window.addEventListener('load', function() {
-            const count = parseInt(localStorage.getItem('visitorCount') || '42');
-            document.getElementById('visitorCount').textContent = count.toString().padStart(6, '0');
+            document.getElementById('historyBody').innerHTML = historyHtml;
+
+        } catch (error) {
+            console.error('Error loading stats:', error);
+            document.getElementById('statsGrid').innerHTML = `<p style="color:red; font-size:11px;">${error.message}<br>Make sure your Google Apps Script is deployed correctly.</p>`;
+        }
+    }
+
+    function showStatus(elementId, message, type) {
+        const statusDiv = document.getElementById(elementId);
+        statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        setTimeout(() => {
+            statusDiv.innerHTML = '';
+        }, 5000);
+    }
+
+    function submitTerminalName() {
+        const input = document.getElementById('terminalNameInput');
+        const errEl = document.getElementById('terminalError');
+        const name = input.value.trim();
+
+        if (!name) {
+            errEl.textContent = 'Name cannot be empty.';
+            return;
+        }
+        errEl.textContent = '';
+        currentUser = name;
+        document.getElementById('loggedInName').textContent = name;
+
+        document.getElementById('xp-login-overlay').classList.add('hidden');
+        document.getElementById('xp-desktop').classList.remove('login-blur');
+    }
+
+    // ── Window chrome handlers ──
+    function xpMinimize(winId) {
+        const win = document.getElementById(winId);
+        win.classList.toggle('minimized');
+    }
+
+    function xpMaximize(winId) {
+        const win = document.getElementById(winId);
+        if (win.style.position === 'fixed') {
+            win.style.position = '';
+            win.style.inset = '';
+            win.style.zIndex = '';
+            win.style.width = '';
+            win.style.height = '';
+            win.style.margin = '';
+        } else {
+            win.style.position = 'fixed';
+            win.style.inset = '0 0 30px 0';
+            win.style.zIndex = '500';
+            win.style.width = '100%';
+            win.style.height = 'calc(100vh - 30px)';
+            win.style.margin = '0';
+        }
+    }
+
+    function xpClose(winId, btnId) {
+        document.getElementById(winId).classList.add('hidden');
+        const btn = document.getElementById(btnId);
+        if (btn) btn.classList.remove('active');
+    }
+
+    function xpRestore(winId, btnId) {
+        const win = document.getElementById(winId);
+        if (win.classList.contains('hidden')) {
+            win.classList.remove('hidden');
+            win.classList.remove('minimized');
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('active');
+        } else if (win.classList.contains('minimized')) {
+            win.classList.remove('minimized');
+        } else {
+            xpMinimize(winId);
+        }
+    }
+
+    // ── XP Clock ──
+    function updateXpClock() {
+        const now = new Date();
+        document.getElementById('xp-clock').textContent =
+            `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+    setInterval(updateXpClock, 10000);
+    updateXpClock();
+
+    // ── Login dialog wiring ──
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('terminalNameInput');
+        const confirmBtn = document.getElementById('confirmBtn');
+        input.addEventListener('input', () => {
+            confirmBtn.disabled = input.value.trim().length === 0;
         });
-    </script>
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !confirmBtn.disabled) submitTerminalName();
+        });
+        input.focus();
+    });
+</script>
 </body>
 </html>
