@@ -927,15 +927,6 @@
         }
     }
 
-    // ── XP Clock ──
-    function updateXpClock() {
-        const now = new Date();
-        document.getElementById('xp-clock').textContent =
-            `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }
-    setInterval(updateXpClock, 10000);
-    updateXpClock();
-
     // ── Login dialog wiring ──
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('terminalNameInput');
