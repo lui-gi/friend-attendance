@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friend Zone Attendance Tracker</title>
+    <title>Friend Attendance Tracker</title>
     <style>
         :root {
             --xp-titlebar-start: #0058e7;
@@ -453,6 +453,56 @@
             margin-right: 8px;
         }
 
+        #taskbar-news-btn {
+            height: 22px;
+            padding: 0 8px;
+            background: linear-gradient(180deg, #4a7ae8 0%, #3060c8 100%);
+            border: 1px solid #1448a0;
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 0 rgba(0,0,0,0.2);
+            border-radius: 2px;
+            color: #fff;
+            font-size: 10px;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #taskbar-news-btn:hover {
+            background: linear-gradient(180deg, #5a8af8 0%, #4070d8 100%);
+        }
+
+        #taskbar-news-btn:active {
+            background: linear-gradient(180deg, #2050b8 0%, #3060c8 100%);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        #win-news-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        #win-news {
+            width: 340px;
+            max-width: 96vw;
+        }
+
+        #win-news .xp-window-body {
+            padding: 16px 20px 20px;
+        }
+
+        #win-news ul {
+            margin: 8px 0 0 0;
+            padding-left: 18px;
+            font-size: 12px;
+            font-family: Tahoma, Arial, sans-serif;
+            line-height: 1.8;
+        }
+
         /* ── Login overlay ── */
         #xp-login-overlay {
             position: fixed;
@@ -550,7 +600,7 @@
     <div class="xp-window" id="win-stats">
         <div class="xp-titlebar">
             <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1" fill="#fff" opacity=".9"/><rect x="1" y="3" width="14" height="3" rx="1" fill="#4a90e2"/><circle cx="12" cy="11" r="2" fill="#60c060"/></svg>
-            <span class="xp-titlebar-title">Friend Zone Attendance Tracker</span>
+            <span class="xp-titlebar-title">FriendAttendance Tracker</span>
         </div>
         <div class="xp-window-body">
             <h2>Epic Stats</h2>
@@ -613,7 +663,29 @@
 <!-- ══════════════════ TASKBAR ══════════════════ -->
 <div id="xp-taskbar">
     <span id="taskbar-title">friend attendance</span>
+    <button id="taskbar-news-btn" onclick="openNews()">[ news ]</button>
     <span id="taskbar-credit">by: luigi</span>
+</div>
+
+<!-- ══════════════════ NEWS WINDOW ══════════════════ -->
+<div id="win-news-overlay" class="hidden">
+    <div class="xp-window" id="win-news">
+        <div class="xp-titlebar">
+            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1" fill="#fff" opacity=".8"/><text x="8" y="11" text-anchor="middle" font-size="8" fill="#316ac5" font-weight="bold">!</text></svg>
+            <span class="xp-titlebar-title">Upcoming Features</span>
+            <div class="xp-win-controls">
+                <button class="xp-win-btn close" onclick="closeNews()">✕</button>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <strong style="font-size:12px; font-family:Tahoma,Arial,sans-serif;">What's coming next:</strong>
+            <ul>
+                <li>Limit recording attendance to 1x/day</li>
+                <li>Tokens for friends who attend</li>
+                <li>Tokens can be redeemed for name fonts, colors, etc.</li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 
@@ -628,7 +700,7 @@
             <div class="xp-login-header">
                 <div class="xp-login-icon">👤</div>
                 <div class="xp-login-text">
-                    <strong>Welcome to Friend Zone Attendance Tracker</strong>
+                    <strong>Welcome to Friend Attendance Tracker</strong>
                     Please enter your name to continue. Your name will be added to the friends list automatically.
                 </div>
             </div>
@@ -850,6 +922,14 @@
         setTimeout(() => {
             statusDiv.innerHTML = '';
         }, 5000);
+    }
+
+    function openNews() {
+        document.getElementById('win-news-overlay').classList.remove('hidden');
+    }
+
+    function closeNews() {
+        document.getElementById('win-news-overlay').classList.add('hidden');
     }
 
     function submitTerminalName() {
