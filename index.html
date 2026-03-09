@@ -436,20 +436,21 @@
             box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* Systray */
-        #xp-systray {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(180deg, #1448b0 0%, #1040a8 100%);
-            border: 1px solid #1030a0;
-            border-radius: 2px;
-            padding: 0 8px;
-            height: 22px;
+        #taskbar-title {
             color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            font-style: italic;
+            font-family: Tahoma, Arial, sans-serif;
+            margin-left: 8px;
+        }
+
+        #taskbar-credit {
+            color: rgba(255,255,255,0.75);
             font-size: 11px;
             font-family: Tahoma, Arial, sans-serif;
+            margin-left: auto;
+            margin-right: 8px;
         }
 
         /* ── Login overlay ── */
@@ -621,25 +622,8 @@
 
 <!-- ══════════════════ TASKBAR ══════════════════ -->
 <div id="xp-taskbar">
-    <button id="xp-start-btn">
-        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="6.5" height="6.5" fill="#f25022"/>
-            <rect x="8.5" y="1" width="6.5" height="6.5" fill="#7fba00"/>
-            <rect x="1" y="8.5" width="6.5" height="6.5" fill="#00a4ef"/>
-            <rect x="8.5" y="8.5" width="6.5" height="6.5" fill="#ffb900"/>
-        </svg>
-        start
-    </button>
-    <div class="taskbar-sep"></div>
-    <button class="taskbar-win-btn active" id="btn-stats" onclick="xpRestore('win-stats', 'btn-stats')">
-        📊 Stats
-    </button>
-    <button class="taskbar-win-btn active" id="btn-attendance" onclick="resetAttendanceDate(); xpRestore('win-attendance', 'btn-attendance')">
-        📅 Attendance
-    </button>
-    <div id="xp-systray">
-        <span id="xp-clock">00:00</span>
-    </div>
+    <span id="taskbar-title">friend attendance</span>
+    <span id="taskbar-credit">by: luigi</span>
 </div>
 
 
@@ -849,7 +833,11 @@
     }
 
     function resetAttendanceDate() {
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const today = `${yyyy}-${mm}-${dd}`;
         document.getElementById('attendanceDate').value = today;
         syncDayToDate(today);
     }
