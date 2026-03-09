@@ -565,6 +565,35 @@
             margin-top: 4px;
         }
 
+        .xp-name-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+        .xp-name-btn {
+            min-width: 0;
+            width: 100%;
+            padding: 5px 4px;
+            text-align: center;
+        }
+        .xp-name-btn.selected {
+            background: linear-gradient(180deg, #1c60c8 0%, #2878d8 50%, #4d9cf0 100%);
+            color: #fff;
+            border-color: #0028a0;
+            font-weight: bold;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.35);
+        }
+        .xp-name-btn { position: relative; }
+        .name-edit-icon {
+            font-size: 8px;
+            opacity: 0;
+            transition: opacity 0.15s;
+            cursor: pointer;
+            vertical-align: top;
+        }
+        .xp-name-btn:hover .name-edit-icon { opacity: 0.5; }
+
         /* Separator in taskbar */
         .taskbar-sep {
             width: 1px;
@@ -701,16 +730,23 @@
                 <div class="xp-login-icon">👤</div>
                 <div class="xp-login-text">
                     <strong>Welcome to Friend Attendance Tracker</strong>
-                    Please enter your name to continue. Your name will be added to the friends list automatically.
-                    <br><br>
-                    <span style="color:#316ac5; font-weight:bold;">Always use the same name!</span>
-                    Using a consistent name earns you tokens and keeps attendance records accurate.
+                    Select your name to continue.
                 </div>
             </div>
             <div>
-                <label for="terminalNameInput">Name:</label>
-                <input type="text" id="terminalNameInput" autocomplete="off" spellcheck="false" placeholder="Enter your name…">
-                <div id="terminalError" style="color:#cc0000; font-size:11px; min-height:14px;"></div>
+                <label>Select your name:</label>
+                <div class="xp-name-grid" id="nameGrid">
+                    <button class="xp-btn xp-name-btn" data-realname="Luigi"    onclick="selectRealName(this)">Luigi <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="James"    onclick="selectRealName(this)">James <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Harrison" onclick="selectRealName(this)">Harrison <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Robin"    onclick="selectRealName(this)">Robin <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Greg"     onclick="selectRealName(this)">Greg <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Robbie"   onclick="selectRealName(this)">Robbie <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Vi"       onclick="selectRealName(this)">Vi <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Steven"   onclick="selectRealName(this)">Steven <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Fiona"    onclick="selectRealName(this)">Fiona <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                </div>
+                <div id="terminalError" style="color:#cc0000; font-size:11px; min-height:14px; margin-top:4px;"></div>
             </div>
             <div class="xp-login-actions">
                 <button id="confirmBtn" class="xp-btn xp-btn-primary" disabled onclick="submitTerminalName()">Confirm</button>
@@ -726,20 +762,54 @@
     let API_URL = HARDCODED_API_URL;
 
     let currentUser = '';
+    let selectedRealName = '';
+    let nameMap = JSON.parse(localStorage.getItem('nameMap') || '{}');
+
+    function selectRealName(btn) {
+        document.querySelectorAll('.xp-name-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedRealName = nameMap[btn.dataset.realname] || btn.dataset.realname;
+        document.getElementById('confirmBtn').disabled = false;
+        document.getElementById('terminalError').textContent = '';
+    }
+
+    async function loadNameMap() {
+        try {
+            const response = await fetch(API_URL + '?action=getNameMap');
+            if (response.ok) {
+                const data = await response.json();
+                // Merge server data into nameMap (server wins over localStorage cache)
+                Object.assign(nameMap, data);
+                localStorage.setItem('nameMap', JSON.stringify(nameMap));
+            }
+        } catch (e) {
+            // Network failure: fall back to localStorage cache (already loaded at startup)
+            console.warn('Could not fetch nameMap from server:', e);
+        }
+        // Apply nameMap to buttons regardless
+        document.querySelectorAll('.xp-name-btn').forEach(btn => {
+            const orig = btn.dataset.realname;
+            const display = nameMap[orig] || orig;
+            btn.childNodes[0].textContent = display + ' ';
+        });
+    }
 
     // Load saved data
-    window.onload = function() {
+    window.onload = async function() {
         document.getElementById('xp-desktop').classList.add('login-blur');
 
-        // Use localStorage URL if available, otherwise use hardcoded URL
         const savedUrl = localStorage.getItem('apiUrl');
-        if (savedUrl) {
-            API_URL = savedUrl;
-        }
+        if (savedUrl) API_URL = savedUrl;
 
-        // Load stats on page load
+        // Apply localStorage cache immediately (fast, no flash)
+        document.querySelectorAll('.xp-name-btn').forEach(btn => {
+            const orig = btn.dataset.realname;
+            btn.childNodes[0].textContent = (nameMap[orig] || orig) + ' ';
+        });
+
         if (API_URL) {
-            loadStats();
+            await loadNameMap();   // fetch server nameMap, then re-apply to buttons
+            loadStats();           // loadStats now uses the up-to-date nameMap
         }
 
         resetAttendanceDate();
@@ -819,8 +889,9 @@
             records.forEach(record => {
                 const attendees = record[2].split(',').map(s => s.trim());
                 attendees.forEach(attendee => {
-                    if (attendee && !friendCounts[attendee]) {
-                        friendCounts[attendee] = 0;
+                    const name = nameMap[attendee] || attendee;
+                    if (name && !friendCounts[name]) {
+                        friendCounts[name] = 0;
                     }
                 });
             });
@@ -829,8 +900,9 @@
             records.forEach(record => {
                 const attendees = record[2].split(',').map(s => s.trim());
                 attendees.forEach(attendee => {
-                    if (attendee && friendCounts[attendee] !== undefined) {
-                        friendCounts[attendee]++;
+                    const name = nameMap[attendee] || attendee;
+                    if (name && friendCounts[name] !== undefined) {
+                        friendCounts[name]++;
                     }
                 });
             });
@@ -875,7 +947,7 @@
                 <tr>
                     <td><strong>${formatSheetDate(record[0])}</strong></td>
                     <td>${record[1]}</td>
-                    <td>${record[2]}</td>
+                    <td>${record[2].split(',').map(s => nameMap[s.trim()] || s.trim()).join(', ')}</td>
                 </tr>
             `).join('');
 
@@ -935,18 +1007,14 @@
     }
 
     function submitTerminalName() {
-        const input = document.getElementById('terminalNameInput');
         const errEl = document.getElementById('terminalError');
-        const name = input.value.trim();
-
-        if (!name) {
-            errEl.textContent = 'Name cannot be empty.';
+        if (!selectedRealName) {
+            errEl.textContent = 'Please select your name.';
             return;
         }
         errEl.textContent = '';
-        currentUser = name;
-        document.getElementById('loggedInName').textContent = name;
-
+        currentUser = selectedRealName;
+        document.getElementById('loggedInName').textContent = selectedRealName;
         document.getElementById('xp-login-overlay').classList.add('hidden');
         document.getElementById('xp-desktop').classList.remove('login-blur');
     }
@@ -996,17 +1064,50 @@
         }
     }
 
+    function editName(event, iconEl) {
+        event.stopPropagation();
+        const btn = iconEl.closest('.xp-name-btn');
+        const orig = btn.dataset.realname;
+        const current = nameMap[orig] || orig;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = current;
+        input.style.cssText = 'width:80%; font-size:10px; padding:1px 2px; box-sizing:border-box;';
+
+        btn.innerHTML = '';
+        btn.appendChild(input);
+        input.focus();
+        input.select();
+
+        function save() {
+            const newName = input.value.trim() || orig;
+            nameMap[orig] = newName;
+            localStorage.setItem('nameMap', JSON.stringify(nameMap));
+            btn.innerHTML = newName + ' <span class="name-edit-icon" onclick="editName(event,this)">✏️</span>';
+            if (btn.classList.contains('selected')) selectedRealName = newName;
+
+            // Persist to Sheets (fire-and-forget)
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: 'setName', original: orig, display: newName })
+            }).catch(() => {}); // silently ignore network errors
+        }
+
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { input.blur(); }
+            if (e.key === 'Escape') {
+                btn.innerHTML = current + ' <span class="name-edit-icon" onclick="editName(event,this)">✏️</span>';
+            }
+        });
+        input.addEventListener('blur', save);
+    }
+
     // ── Login dialog wiring ──
     document.addEventListener('DOMContentLoaded', function() {
-        const input = document.getElementById('terminalNameInput');
-        const confirmBtn = document.getElementById('confirmBtn');
-        input.addEventListener('input', () => {
-            confirmBtn.disabled = input.value.trim().length === 0;
-        });
-        input.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !confirmBtn.disabled) submitTerminalName();
-        });
-        input.focus();
+        const firstNameBtn = document.querySelector('.xp-name-btn');
+        if (firstNameBtn) firstNameBtn.focus();
     });
 </script>
 </body>
