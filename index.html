@@ -585,14 +585,23 @@
             box-shadow: inset 1px 1px 2px rgba(0,0,0,0.35);
         }
         .xp-name-btn { position: relative; }
+        .xp-name-hint {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
         .name-edit-icon {
-            font-size: 8px;
+            position: absolute;
+            top: 2px;
+            right: 3px;
             opacity: 0;
             transition: opacity 0.15s;
             cursor: pointer;
-            vertical-align: top;
+            line-height: 1;
+            color: #555;
         }
-        .xp-name-btn:hover .name-edit-icon { opacity: 0.5; }
+        .xp-name-btn:hover .name-edit-icon { opacity: 1; }
 
         /* Separator in taskbar */
         .taskbar-sep {
@@ -735,16 +744,17 @@
             </div>
             <div>
                 <label>Select your name:</label>
+                <div class="xp-name-hint">✏️ Click the pencil to edit your name!</div>
                 <div class="xp-name-grid" id="nameGrid">
-                    <button class="xp-btn xp-name-btn" data-realname="Luigi"    onclick="selectRealName(this)">Luigi <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="James"    onclick="selectRealName(this)">James <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Harrison" onclick="selectRealName(this)">Harrison <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Robin"    onclick="selectRealName(this)">Robin <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Greg"     onclick="selectRealName(this)">Greg <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Robbie"   onclick="selectRealName(this)">Robbie <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Vi"       onclick="selectRealName(this)">Vi <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Steven"   onclick="selectRealName(this)">Steven <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
-                    <button class="xp-btn xp-name-btn" data-realname="Fiona"    onclick="selectRealName(this)">Fiona <span class="name-edit-icon" onclick="editName(event,this)">✏️</span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Luigi"    onclick="selectRealName(this)">Luigi <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="James"    onclick="selectRealName(this)">James <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Harrison" onclick="selectRealName(this)">Harrison <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Robin"    onclick="selectRealName(this)">Robin <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Greg"     onclick="selectRealName(this)">Greg <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Robbie"   onclick="selectRealName(this)">Robbie <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Vi"       onclick="selectRealName(this)">Vi <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Steven"   onclick="selectRealName(this)">Steven <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
+                    <button class="xp-btn xp-name-btn" data-realname="Fiona"    onclick="selectRealName(this)">Fiona <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span></button>
                 </div>
                 <div id="terminalError" style="color:#cc0000; font-size:11px; min-height:14px; margin-top:4px;"></div>
             </div>
@@ -1084,7 +1094,7 @@
             const newName = input.value.trim() || orig;
             nameMap[orig] = newName;
             localStorage.setItem('nameMap', JSON.stringify(nameMap));
-            btn.innerHTML = newName + ' <span class="name-edit-icon" onclick="editName(event,this)">✏️</span>';
+            btn.innerHTML = newName + ' <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
             if (btn.classList.contains('selected')) selectedRealName = newName;
 
             // Persist to Sheets (fire-and-forget)
@@ -1098,7 +1108,7 @@
         input.addEventListener('keydown', e => {
             if (e.key === 'Enter') { input.blur(); }
             if (e.key === 'Escape') {
-                btn.innerHTML = current + ' <span class="name-edit-icon" onclick="editName(event,this)">✏️</span>';
+                btn.innerHTML = current + ' <span class="name-edit-icon" onclick="editName(event,this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
             }
         });
         input.addEventListener('blur', save);
