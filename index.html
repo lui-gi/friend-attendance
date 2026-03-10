@@ -892,7 +892,8 @@
             const records = data.slice(1);
 
             // Calculate stats - collect ALL unique friends from the sheet data
-            const totalSessions = records.length;
+            const uniqueDates = new Set(records.map(r => formatSheetDate(r[0])));
+            const totalSessions = uniqueDates.size;
             const friendCounts = {};
 
             // First pass: collect all unique friend names from the sheet
@@ -906,12 +907,21 @@
                 });
             });
 
-            // Second pass: count attendance
+            // Group records by date, collecting all friends per date
+            const byDate = {};
             records.forEach(record => {
-                const attendees = record[2].split(',').map(s => s.trim());
-                attendees.forEach(attendee => {
+                const date = formatSheetDate(record[0]);
+                if (!byDate[date]) byDate[date] = new Set();
+                record[2].split(',').map(s => s.trim()).forEach(attendee => {
                     const name = nameMap[attendee] || attendee;
-                    if (name && friendCounts[name] !== undefined) {
+                    if (name) byDate[date].add(name);
+                });
+            });
+
+            // Count how many unique dates each friend attended
+            Object.values(byDate).forEach(friendsOnDay => {
+                friendsOnDay.forEach(name => {
+                    if (friendCounts[name] !== undefined) {
                         friendCounts[name]++;
                     }
                 });
