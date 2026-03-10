@@ -772,12 +772,14 @@
     let API_URL = HARDCODED_API_URL;
 
     let currentUser = '';
+    let selectedOrigName = '';
     let selectedRealName = '';
     let nameMap = JSON.parse(localStorage.getItem('nameMap') || '{}');
 
     function selectRealName(btn) {
         document.querySelectorAll('.xp-name-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
+        selectedOrigName = btn.dataset.realname;
         selectedRealName = nameMap[btn.dataset.realname] || btn.dataset.realname;
         document.getElementById('confirmBtn').disabled = false;
         document.getElementById('terminalError').textContent = '';
@@ -1033,7 +1035,7 @@
             return;
         }
         errEl.textContent = '';
-        currentUser = selectedRealName;
+        currentUser = selectedOrigName;
         document.getElementById('loggedInName').textContent = selectedRealName;
         document.getElementById('xp-login-overlay').classList.add('hidden');
         document.getElementById('xp-desktop').classList.remove('login-blur');
