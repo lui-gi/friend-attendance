@@ -1236,10 +1236,14 @@
 
             const canAfford = balance >= item.cost;
             const previewName = currentUser ? (nameMap[currentUser] || currentUser) : 'Preview';
+            const ownedItems = userCosmetics.ownedItems || [];
+            const isOwned = ownedItems.includes(item.id);
 
             const actionHtml = isEquipped
                 ? `<button class="xp-btn" onclick="unequipItem('${item.id}')">Unequip</button>`
-                : `<button class="xp-btn" ${canAfford ? '' : 'disabled'} onclick="purchaseItem('${item.id}')">Buy</button>`;
+                : isOwned
+                    ? `<button class="xp-btn" onclick="equipItem('${item.id}')">Equip</button>`
+                    : `<button class="xp-btn" ${canAfford ? '' : 'disabled'} onclick="purchaseItem('${item.id}')">Buy</button>`;
 
             html += `<tr>
                 <td>${item.label}</td>
@@ -1266,6 +1270,8 @@
         if (item.type === 'color') cosmeticsMap[currentUser].color = item.value;
         if (item.type === 'font') cosmeticsMap[currentUser].font = item.value;
         if (item.type === 'style') cosmeticsMap[currentUser][item.value] = true;
+        if (!cosmeticsMap[currentUser].ownedItems) cosmeticsMap[currentUser].ownedItems = [];
+        if (!cosmeticsMap[currentUser].ownedItems.includes(item.id)) cosmeticsMap[currentUser].ownedItems.push(item.id);
 
         applyAllCosmetics();
         updateTokenDisplay();
@@ -1280,11 +1286,39 @@
                 original: currentUser,
                 type: item.type,
                 value: item.value,
-                cost: item.cost
+                cost: item.cost,
+                itemId: item.id
             })
         }).catch(() => {});
 
         // Reload from server after a moment to confirm
+        setTimeout(async () => {
+            await loadShopData();
+            renderShop();
+            loadStats();
+        }, 1500);
+    }
+
+    async function equipItem(itemId) {
+        const item = SHOP_CATALOG.find(i => i.id === itemId);
+        if (!item || !currentUser) return;
+
+        // Optimistic update
+        if (!cosmeticsMap[currentUser]) cosmeticsMap[currentUser] = {};
+        if (item.type === 'color') cosmeticsMap[currentUser].color = item.value;
+        if (item.type === 'font') cosmeticsMap[currentUser].font = item.value;
+        if (item.type === 'style') cosmeticsMap[currentUser][item.value] = true;
+
+        applyAllCosmetics();
+        renderShop();
+        loadStats();
+
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'equipItem', original: currentUser, type: item.type, value: item.value })
+        }).catch(() => {});
+
         setTimeout(async () => {
             await loadShopData();
             renderShop();
@@ -1301,6 +1335,9 @@
         if (item.type === 'color') delete cosmeticsMap[currentUser].color;
         if (item.type === 'font') delete cosmeticsMap[currentUser].font;
         if (item.type === 'style') cosmeticsMap[currentUser][item.value] = false;
+        // Keep ownership so "Equip" button shows instead of "Buy"
+        if (!cosmeticsMap[currentUser].ownedItems) cosmeticsMap[currentUser].ownedItems = [];
+        if (!cosmeticsMap[currentUser].ownedItems.includes(item.id)) cosmeticsMap[currentUser].ownedItems.push(item.id);
 
         applyAllCosmetics();
         renderShop();

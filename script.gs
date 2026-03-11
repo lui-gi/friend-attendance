@@ -47,10 +47,11 @@ function doGet(e) {
     const cosmetics = {};
 
     if (cosmeticsSheet && cosmeticsSheet.getLastRow() >= 2) {
-      const cosRows = cosmeticsSheet.getRange(2, 1, cosmeticsSheet.getLastRow() - 1, 6).getValues();
-      // Columns: original_name | color | font | bold | italic | tokens_spent
+      const numCols = cosmeticsSheet.getLastColumn();
+      const cosRows = cosmeticsSheet.getRange(2, 1, cosmeticsSheet.getLastRow() - 1, Math.max(numCols, 6)).getValues();
+      // Columns: original_name | color | font | bold | italic | tokens_spent | owned_items
       cosRows.forEach(row => {
-        const [origName, color, font, bold, italic, spent] = row;
+        const [origName, color, font, bold, italic, spent, ownedRaw] = row;
         if (!origName) return;
         tokensSpent[origName] = spent || 0;
         cosmetics[origName] = {
@@ -64,6 +65,19 @@ function doGet(e) {
         if (!cosmetics[origName].font) delete cosmetics[origName].font;
         if (!cosmetics[origName].bold) delete cosmetics[origName].bold;
         if (!cosmetics[origName].italic) delete cosmetics[origName].italic;
+
+        // Parse owned items (column 7), with backward-compat inference
+        let ownedItems = ownedRaw ? String(ownedRaw).split(',').map(s => s.trim()).filter(Boolean) : [];
+        if (ownedItems.length === 0) {
+          // Infer from active equipped values
+          const colorMap = { '#ffd700': 'color_gold', '#cc2200': 'color_red', '#00aa44': 'color_green', '#8800cc': 'color_purple', '#ff69b4': 'color_pink' };
+          const fontMap = { 'Comic Sans MS': 'font_comic', 'Georgia': 'font_georgia', 'Courier New': 'font_courier', 'Impact': 'font_impact' };
+          if (color && colorMap[color]) ownedItems.push(colorMap[color]);
+          if (font && fontMap[font]) ownedItems.push(fontMap[font]);
+          if (bold === true || bold === 'TRUE') ownedItems.push('style_bold');
+          if (italic === true || italic === 'TRUE') ownedItems.push('style_italic');
+        }
+        cosmetics[origName].ownedItems = ownedItems;
       });
     }
 
@@ -159,9 +173,11 @@ function doPost(e) {
 
     const newSpent = currentSpent + cost;
 
+    const itemId = data.itemId || '';
+
     if (userRow === -1) {
       // Create new row
-      const newRow = [origName, '', '', false, false, newSpent];
+      const newRow = [origName, '', '', false, false, newSpent, itemId];
       if (data.type === 'color') newRow[1] = data.value;
       if (data.type === 'font') newRow[2] = data.value;
       if (data.type === 'style' && data.value === 'bold') newRow[3] = true;
@@ -174,6 +190,15 @@ function doPost(e) {
       if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(userRow, 4).setValue(true);
       if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(userRow, 5).setValue(true);
       cosSheet.getRange(userRow, 6).setValue(newSpent);
+      // Update owned items column 7
+      if (itemId) {
+        const currentOwned = cosSheet.getRange(userRow, 7).getValue() || '';
+        const ownedList = currentOwned ? String(currentOwned).split(',').map(s => s.trim()).filter(Boolean) : [];
+        if (!ownedList.includes(itemId)) {
+          ownedList.push(itemId);
+          cosSheet.getRange(userRow, 7).setValue(ownedList.join(','));
+        }
+      }
     }
 
     return ContentService.createTextOutput(JSON.stringify({ ok: true, newBalance: earned - newSpent }))
@@ -196,6 +221,29 @@ function doPost(e) {
         if (data.type === 'font') cosSheet.getRange(row, 3).setValue('');
         if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(row, 4).setValue(false);
         if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(row, 5).setValue(false);
+        break;
+      }
+    }
+    return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  if (data.action === 'equipItem') {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let cosSheet = ss.getSheetByName('Cosmetics');
+    if (!cosSheet) return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
+
+    const lastRow = cosSheet.getLastRow();
+    if (lastRow < 2) return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
+
+    const nameCol = cosSheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (let i = 0; i < nameCol.length; i++) {
+      if (nameCol[i][0] === data.original) {
+        const row = i + 2;
+        if (data.type === 'color') cosSheet.getRange(row, 2).setValue(data.value);
+        if (data.type === 'font') cosSheet.getRange(row, 3).setValue(data.value);
+        if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(row, 4).setValue(true);
+        if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(row, 5).setValue(true);
+        // No token charge — tokens_spent (col 6) is not modified
         break;
       }
     }
