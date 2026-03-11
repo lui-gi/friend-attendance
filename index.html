@@ -627,6 +627,92 @@
             font-size: 9px;
             resize: vertical;
         }
+
+        /* ── Shop overlay ── */
+        #win-shop-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        #win-shop {
+            width: 440px;
+            max-width: 96vw;
+        }
+
+        #win-shop .xp-window-body {
+            padding: 16px 20px 20px;
+            overflow-y: auto;
+            max-height: calc(90vh - 40px);
+        }
+
+        .shop-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .shop-grid th {
+            background: linear-gradient(180deg, #e8eef8 0%, #d0d8f0 100%);
+            padding: 4px 8px;
+            text-align: left;
+            border: 1px solid #9a9a9a;
+            font-weight: bold;
+        }
+
+        .shop-grid td {
+            background: #fff;
+            padding: 4px 8px;
+            border: 1px solid #d4d0c8;
+            vertical-align: middle;
+        }
+
+        .shop-grid tr:nth-child(even) td {
+            background: #f0f4ff;
+        }
+
+        .shop-item-preview {
+            display: inline-block;
+            padding: 1px 4px;
+        }
+
+        .shop-balance {
+            display: inline-block;
+            background: #fff8c4;
+            border: 1px solid #c8a800;
+            padding: 2px 8px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        #taskbar-shop-btn {
+            height: 22px;
+            padding: 0 8px;
+            background: linear-gradient(180deg, #4a7ae8 0%, #3060c8 100%);
+            border: 1px solid #1448a0;
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 0 rgba(0,0,0,0.2);
+            border-radius: 2px;
+            color: #fff;
+            font-size: 10px;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #taskbar-shop-btn:hover {
+            background: linear-gradient(180deg, #5a8af8 0%, #4070d8 100%);
+        }
+
+        #taskbar-shop-btn:active {
+            background: linear-gradient(180deg, #2050b8 0%, #3060c8 100%);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
@@ -687,6 +773,7 @@
             <div class="xp-group">
                 <legend>Attendee</legend>
                 <p style="font-size:11px;">Currently logged in as: <strong id="loggedInName"></strong></p>
+                <p style="font-size:11px; margin-top:4px;">Balance: <strong id="tokenBalance">—</strong> tokens</p>
             </div>
 
             <button class="xp-btn xp-btn-primary" onclick="recordAttendance()">Record Attendance</button>
@@ -702,6 +789,7 @@
 <div id="xp-taskbar">
     <span id="taskbar-title">friend attendance</span>
     <button id="taskbar-news-btn" onclick="openNews()">[ news ]</button>
+    <button id="taskbar-shop-btn" onclick="openShop()">[ shop ]</button>
     <span id="taskbar-credit">by: luigi</span>
 </div>
 
@@ -722,6 +810,23 @@
                 <li>Tokens for friends who attend</li>
                 <li>Tokens can be redeemed for name fonts, colors, etc.</li>
             </ul>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════ SHOP OVERLAY ══════════════════ -->
+<div id="win-shop-overlay" class="hidden">
+    <div class="xp-window" id="win-shop">
+        <div class="xp-titlebar">
+            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="9" rx="1" fill="#fff" opacity=".8"/><path d="M5 4 Q5 2 8 2 Q11 2 11 4" stroke="#4a90e2" stroke-width="1.5" fill="none"/></svg>
+            <span class="xp-titlebar-title">🛒 Shop</span>
+            <div class="xp-win-controls">
+                <button class="xp-win-btn close" onclick="closeShop()">✕</button>
+            </div>
+        </div>
+        <div class="xp-window-body">
+            <div id="shopContent">Loading…</div>
         </div>
     </div>
 </div>
@@ -775,6 +880,22 @@
     let selectedOrigName = '';
     let selectedRealName = '';
     let nameMap = JSON.parse(localStorage.getItem('nameMap') || '{}');
+    let cosmeticsMap = {};  // { origName: { color, font, bold, italic } }
+    let tokensMap = {};     // { origName: balance }
+
+    const SHOP_CATALOG = [
+      { id: 'color_gold',   type: 'color', label: '🟡 Gold',    value: '#ffd700',       cost: 5  },
+      { id: 'color_red',    type: 'color', label: '🔴 Red',     value: '#cc2200',       cost: 5  },
+      { id: 'color_green',  type: 'color', label: '🟢 Green',   value: '#00aa44',       cost: 5  },
+      { id: 'color_purple', type: 'color', label: '🟣 Purple',  value: '#8800cc',       cost: 5  },
+      { id: 'color_pink',   type: 'color', label: '🩷 Pink',    value: '#ff69b4',       cost: 5  },
+      { id: 'font_comic',   type: 'font',  label: 'Comic Sans', value: 'Comic Sans MS', cost: 10 },
+      { id: 'font_georgia', type: 'font',  label: 'Georgia',    value: 'Georgia',       cost: 10 },
+      { id: 'font_courier', type: 'font',  label: 'Courier',    value: 'Courier New',   cost: 10 },
+      { id: 'font_impact',  type: 'font',  label: 'Impact',     value: 'Impact',        cost: 10 },
+      { id: 'style_bold',   type: 'style', label: 'Bold',       value: 'bold',          cost: 3  },
+      { id: 'style_italic', type: 'style', label: 'Italic',     value: 'italic',        cost: 3  },
+    ];
 
     function selectRealName(btn) {
         document.querySelectorAll('.xp-name-btn').forEach(b => b.classList.remove('selected'));
@@ -803,6 +924,7 @@
             const orig = btn.dataset.realname;
             const display = nameMap[orig] || orig;
             btn.childNodes[0].textContent = display + ' ';
+            btn.style.cssText = nameStyle(orig);
         });
     }
 
@@ -821,7 +943,8 @@
 
         if (API_URL) {
             await loadNameMap();   // fetch server nameMap, then re-apply to buttons
-            loadStats();           // loadStats now uses the up-to-date nameMap
+            await loadShopData();  // fetch cosmeticsMap + tokensMap, apply cosmetics
+            loadStats();           // loadStats now uses the up-to-date nameMap + cosmeticsMap
         }
 
         resetAttendanceDate();
@@ -896,44 +1019,42 @@
             // Calculate stats - collect ALL unique friends from the sheet data
             const uniqueDates = new Set(records.map(r => formatSheetDate(r[0])));
             const totalSessions = uniqueDates.size;
-            const friendCounts = {};
+            const friendCounts = {}; // keyed by origName
 
-            // First pass: collect all unique friend names from the sheet
+            // First pass: collect all unique friend original names from the sheet
             records.forEach(record => {
                 const attendees = record[2].split(',').map(s => s.trim());
-                attendees.forEach(attendee => {
-                    const name = nameMap[attendee] || attendee;
-                    if (name && !friendCounts[name]) {
-                        friendCounts[name] = 0;
+                attendees.forEach(origName => {
+                    if (origName && !(origName in friendCounts)) {
+                        friendCounts[origName] = 0;
                     }
                 });
             });
 
-            // Group records by date, collecting all friends per date
+            // Group records by date, collecting all friends per date (by origName)
             const byDate = {};
             records.forEach(record => {
                 const date = formatSheetDate(record[0]);
                 if (!byDate[date]) byDate[date] = new Set();
-                record[2].split(',').map(s => s.trim()).forEach(attendee => {
-                    const name = nameMap[attendee] || attendee;
-                    if (name) byDate[date].add(name);
+                record[2].split(',').map(s => s.trim()).forEach(origName => {
+                    if (origName) byDate[date].add(origName);
                 });
             });
 
             // Count how many unique dates each friend attended
             Object.values(byDate).forEach(friendsOnDay => {
-                friendsOnDay.forEach(name => {
-                    if (friendCounts[name] !== undefined) {
-                        friendCounts[name]++;
+                friendsOnDay.forEach(origName => {
+                    if (origName in friendCounts) {
+                        friendCounts[origName]++;
                     }
                 });
             });
 
             // Find MVP
             let mvp = { name: 'Nobody', count: 0 };
-            Object.entries(friendCounts).forEach(([name, count]) => {
+            Object.entries(friendCounts).forEach(([origName, count]) => {
                 if (count > mvp.count) {
-                    mvp = { name, count };
+                    mvp = { name: nameMap[origName] || origName, count };
                 }
             });
 
@@ -951,11 +1072,13 @@
             `;
 
             // Individual friend stats - shows ALL friends from sheet data
-            Object.entries(friendCounts).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
+            Object.entries(friendCounts).sort((a, b) => b[1] - a[1]).forEach(([origName, count]) => {
+                const name = nameMap[origName] || origName;
                 const percentage = totalSessions > 0 ? Math.round((count / totalSessions) * 100) : 0;
+                const st = nameStyle(origName);
                 statsHtml += `
                     <div class="stat-box">
-                        <div class="stat-label" style="font-weight:bold;">${name}</div>
+                        <div class="stat-label" style="font-weight:bold;${st ? ' ' + st : ''}">${name}</div>
                         <div class="stat-number">${count}</div>
                         <div class="stat-label">${percentage}% Attendance</div>
                     </div>
@@ -969,7 +1092,12 @@
                 <tr>
                     <td><strong>${formatSheetDate(record[0])}</strong></td>
                     <td>${record[1]}</td>
-                    <td>${record[2].split(',').map(s => nameMap[s.trim()] || s.trim()).join(', ')}</td>
+                    <td>${record[2].split(',').map(s => {
+                        const orig = s.trim();
+                        const disp = nameMap[orig] || orig;
+                        const st = nameStyle(orig);
+                        return st ? `<span style="${st}">${disp}</span>` : disp;
+                    }).join(', ')}</td>
                 </tr>
             `).join('');
 
@@ -1028,6 +1156,140 @@
         document.getElementById('win-news-overlay').classList.add('hidden');
     }
 
+    // ── Shop functions ──
+    function nameStyle(origName) {
+        const c = cosmeticsMap[origName] || {};
+        return [
+            c.color  ? `color:${c.color}`                    : '',
+            c.font   ? `font-family:'${c.font}',sans-serif`  : '',
+            c.bold   ? 'font-weight:bold'                    : '',
+            c.italic ? 'font-style:italic'                   : '',
+        ].filter(Boolean).join(';');
+    }
+
+    function applyAllCosmetics() {
+        document.querySelectorAll('.xp-name-btn').forEach(btn => {
+            const orig = btn.dataset.realname;
+            btn.style.cssText = nameStyle(orig);
+        });
+    }
+
+    async function loadShopData() {
+        if (!API_URL) return;
+        try {
+            const response = await fetch(API_URL + '?action=getShopData');
+            if (!response.ok) return;
+            const data = await response.json();
+            tokensMap = data.tokens || {};
+            cosmeticsMap = data.cosmetics || {};
+            applyAllCosmetics();
+            updateTokenDisplay();
+        } catch (e) {
+            console.warn('Could not load shop data:', e);
+        }
+    }
+
+    function updateTokenDisplay() {
+        const el = document.getElementById('tokenBalance');
+        if (!el) return;
+        if (currentUser && tokensMap[currentUser] !== undefined) {
+            el.textContent = tokensMap[currentUser];
+        } else {
+            el.textContent = '—';
+        }
+    }
+
+    function openShop() {
+        renderShop();
+        document.getElementById('win-shop-overlay').classList.remove('hidden');
+    }
+
+    function closeShop() {
+        document.getElementById('win-shop-overlay').classList.add('hidden');
+    }
+
+    function renderShop() {
+        const balance = currentUser && tokensMap[currentUser] !== undefined ? tokensMap[currentUser] : 0;
+        const userCosmetics = cosmeticsMap[currentUser] || {};
+
+        let html = `<div class="shop-balance">💰 Your balance: ${balance} tokens</div>`;
+        html += `<table class="shop-grid">
+            <thead><tr><th>Item</th><th>Preview</th><th>Cost</th><th>Action</th></tr></thead>
+            <tbody>`;
+
+        SHOP_CATALOG.forEach(item => {
+            const previewStyle = (() => {
+                const styles = [];
+                if (item.type === 'color') styles.push(`color:${item.value}`);
+                if (item.type === 'font') styles.push(`font-family:'${item.value}',sans-serif`);
+                if (item.type === 'style' && item.value === 'bold') styles.push('font-weight:bold');
+                if (item.type === 'style' && item.value === 'italic') styles.push('font-style:italic');
+                return styles.join(';');
+            })();
+
+            const isEquipped = (() => {
+                if (item.type === 'color') return userCosmetics.color === item.value;
+                if (item.type === 'font') return userCosmetics.font === item.value;
+                if (item.type === 'style') return userCosmetics[item.value] === true;
+                return false;
+            })();
+
+            const canAfford = balance >= item.cost;
+            const btnDisabled = isEquipped || !canAfford;
+            const btnLabel = isEquipped ? 'Equipped' : 'Buy';
+            const previewName = currentUser ? (nameMap[currentUser] || currentUser) : 'Preview';
+
+            html += `<tr>
+                <td>${item.label}</td>
+                <td><span class="shop-item-preview" style="${previewStyle}">${previewName}</span></td>
+                <td>${item.cost} 🪙</td>
+                <td><button class="xp-btn" ${btnDisabled ? 'disabled' : ''} onclick="purchaseItem('${item.id}')">${btnLabel}</button></td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('shopContent').innerHTML = html;
+    }
+
+    async function purchaseItem(itemId) {
+        const item = SHOP_CATALOG.find(i => i.id === itemId);
+        if (!item || !currentUser) return;
+
+        const balance = tokensMap[currentUser] !== undefined ? tokensMap[currentUser] : 0;
+        if (balance < item.cost) return;
+
+        // Optimistic update
+        tokensMap[currentUser] = balance - item.cost;
+        if (!cosmeticsMap[currentUser]) cosmeticsMap[currentUser] = {};
+        if (item.type === 'color') cosmeticsMap[currentUser].color = item.value;
+        if (item.type === 'font') cosmeticsMap[currentUser].font = item.value;
+        if (item.type === 'style') cosmeticsMap[currentUser][item.value] = true;
+
+        applyAllCosmetics();
+        updateTokenDisplay();
+        renderShop();
+
+        // Fire-and-forget POST (no-cors, same pattern as recordAttendance)
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                action: 'buyItem',
+                original: currentUser,
+                type: item.type,
+                value: item.value,
+                cost: item.cost
+            })
+        }).catch(() => {});
+
+        // Reload from server after a moment to confirm
+        setTimeout(async () => {
+            await loadShopData();
+            renderShop();
+            loadStats();
+        }, 1500);
+    }
+
     function submitTerminalName() {
         const errEl = document.getElementById('terminalError');
         if (!selectedRealName) {
@@ -1039,6 +1301,7 @@
         document.getElementById('loggedInName').textContent = selectedRealName;
         document.getElementById('xp-login-overlay').classList.add('hidden');
         document.getElementById('xp-desktop').classList.remove('login-blur');
+        updateTokenDisplay();
     }
 
     // ── Window chrome handlers ──
