@@ -1235,15 +1235,17 @@
             })();
 
             const canAfford = balance >= item.cost;
-            const btnDisabled = isEquipped || !canAfford;
-            const btnLabel = isEquipped ? 'Equipped' : 'Buy';
             const previewName = currentUser ? (nameMap[currentUser] || currentUser) : 'Preview';
+
+            const actionHtml = isEquipped
+                ? `<button class="xp-btn" onclick="unequipItem('${item.id}')">Unequip</button>`
+                : `<button class="xp-btn" ${canAfford ? '' : 'disabled'} onclick="purchaseItem('${item.id}')">Buy</button>`;
 
             html += `<tr>
                 <td>${item.label}</td>
                 <td><span class="shop-item-preview" style="${previewStyle}">${previewName}</span></td>
                 <td>${item.cost} 🪙</td>
-                <td><button class="xp-btn" ${btnDisabled ? 'disabled' : ''} onclick="purchaseItem('${item.id}')">${btnLabel}</button></td>
+                <td>${actionHtml}</td>
             </tr>`;
         });
 
@@ -1283,6 +1285,33 @@
         }).catch(() => {});
 
         // Reload from server after a moment to confirm
+        setTimeout(async () => {
+            await loadShopData();
+            renderShop();
+            loadStats();
+        }, 1500);
+    }
+
+    async function unequipItem(itemId) {
+        const item = SHOP_CATALOG.find(i => i.id === itemId);
+        if (!item || !currentUser) return;
+
+        // Optimistic update
+        if (!cosmeticsMap[currentUser]) cosmeticsMap[currentUser] = {};
+        if (item.type === 'color') delete cosmeticsMap[currentUser].color;
+        if (item.type === 'font') delete cosmeticsMap[currentUser].font;
+        if (item.type === 'style') cosmeticsMap[currentUser][item.value] = false;
+
+        applyAllCosmetics();
+        renderShop();
+        loadStats();
+
+        fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'unequipItem', original: currentUser, type: item.type, value: item.value })
+        }).catch(() => {});
+
         setTimeout(async () => {
             await loadShopData();
             renderShop();

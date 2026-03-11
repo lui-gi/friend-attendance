@@ -24,7 +24,9 @@ function doGet(e) {
     const datesByName = {}; // origName -> Set of date strings
     attendData.forEach(row => {
       const dateVal = row[0];
-      const dateStr = dateVal ? String(dateVal).split('T')[0] : '';
+      const dateStr = dateVal instanceof Date
+        ? Utilities.formatDate(dateVal, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : String(dateVal).split('T')[0];
       if (!dateStr) return;
       const names = String(row[2]).split(',').map(s => s.trim()).filter(Boolean);
       names.forEach(name => {
@@ -117,7 +119,10 @@ function doPost(e) {
     const attendData = attendSheet.getDataRange().getValues().slice(1);
     const dates = new Set();
     attendData.forEach(row => {
-      const dateStr = row[0] ? String(row[0]).split('T')[0] : '';
+      const dateVal = row[0];
+      const dateStr = dateVal instanceof Date
+        ? Utilities.formatDate(dateVal, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : String(dateVal).split('T')[0];
       if (!dateStr) return;
       const names = String(row[2]).split(',').map(s => s.trim());
       if (names.includes(origName)) dates.add(dateStr);
@@ -173,6 +178,28 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({ ok: true, newBalance: earned - newSpent }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (data.action === 'unequipItem') {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let cosSheet = ss.getSheetByName('Cosmetics');
+    if (!cosSheet) return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
+
+    const lastRow = cosSheet.getLastRow();
+    if (lastRow < 2) return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
+
+    const nameCol = cosSheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (let i = 0; i < nameCol.length; i++) {
+      if (nameCol[i][0] === data.original) {
+        const row = i + 2;
+        if (data.type === 'color') cosSheet.getRange(row, 2).setValue('');
+        if (data.type === 'font') cosSheet.getRange(row, 3).setValue('');
+        if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(row, 4).setValue(false);
+        if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(row, 5).setValue(false);
+        break;
+      }
+    }
+    return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
   }
 
   return ContentService.createTextOutput('OK');
