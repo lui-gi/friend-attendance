@@ -48,10 +48,10 @@ function doGet(e) {
 
     if (cosmeticsSheet && cosmeticsSheet.getLastRow() >= 2) {
       const numCols = cosmeticsSheet.getLastColumn();
-      const cosRows = cosmeticsSheet.getRange(2, 1, cosmeticsSheet.getLastRow() - 1, Math.max(numCols, 6)).getValues();
-      // Columns: original_name | color | font | bold | italic | tokens_spent | owned_items
+      const cosRows = cosmeticsSheet.getRange(2, 1, cosmeticsSheet.getLastRow() - 1, Math.max(numCols, 11)).getValues();
+      // Columns: original_name | color | font | bold | italic | tokens_spent | owned_items | text_decoration | text_transform | text_effect | prefix
       cosRows.forEach(row => {
-        const [origName, color, font, bold, italic, spent, ownedRaw] = row;
+        const [origName, color, font, bold, italic, spent, ownedRaw, textDecoration, textTransform, textEffect, prefix] = row;
         if (!origName) return;
         tokensSpent[origName] = spent || 0;
         cosmetics[origName] = {
@@ -59,12 +59,20 @@ function doGet(e) {
           font: font || null,
           bold: bold === true || bold === 'TRUE',
           italic: italic === true || italic === 'TRUE',
+          textDecoration: textDecoration || null,
+          textTransform: textTransform === true || textTransform === 'TRUE',
+          textEffect: textEffect || null,
+          prefix: prefix || null,
         };
-        // Clean up nulls
+        // Clean up nulls/falsy
         if (!cosmetics[origName].color) delete cosmetics[origName].color;
         if (!cosmetics[origName].font) delete cosmetics[origName].font;
         if (!cosmetics[origName].bold) delete cosmetics[origName].bold;
         if (!cosmetics[origName].italic) delete cosmetics[origName].italic;
+        if (!cosmetics[origName].textDecoration) delete cosmetics[origName].textDecoration;
+        if (!cosmetics[origName].textTransform) delete cosmetics[origName].textTransform;
+        if (!cosmetics[origName].textEffect) delete cosmetics[origName].textEffect;
+        if (!cosmetics[origName].prefix) delete cosmetics[origName].prefix;
 
         // Parse owned items (column 7), with backward-compat inference
         let ownedItems = ownedRaw ? String(ownedRaw).split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -176,12 +184,16 @@ function doPost(e) {
     const itemId = data.itemId || '';
 
     if (userRow === -1) {
-      // Create new row
-      const newRow = [origName, '', '', false, false, newSpent, itemId];
+      // Create new row (11 cols)
+      const newRow = [origName, '', '', false, false, newSpent, itemId, '', false, '', ''];
       if (data.type === 'color') newRow[1] = data.value;
       if (data.type === 'font') newRow[2] = data.value;
       if (data.type === 'style' && data.value === 'bold') newRow[3] = true;
       if (data.type === 'style' && data.value === 'italic') newRow[4] = true;
+      if (data.type === 'decoration') newRow[7] = data.value;
+      if (data.type === 'transform') newRow[8] = true;
+      if (data.type === 'effect') newRow[9] = data.value;
+      if (data.type === 'prefix') newRow[10] = data.value;
       cosSheet.appendRow(newRow);
     } else {
       // Update existing row
@@ -189,6 +201,15 @@ function doPost(e) {
       if (data.type === 'font') cosSheet.getRange(userRow, 3).setValue(data.value);
       if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(userRow, 4).setValue(true);
       if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(userRow, 5).setValue(true);
+      if (data.type === 'decoration') {
+        const cur = cosSheet.getRange(userRow, 8).getValue() || '';
+        const parts = cur ? String(cur).split(' ').filter(Boolean) : [];
+        if (!parts.includes(data.value)) parts.push(data.value);
+        cosSheet.getRange(userRow, 8).setValue(parts.join(' '));
+      }
+      if (data.type === 'transform') cosSheet.getRange(userRow, 9).setValue(true);
+      if (data.type === 'effect') cosSheet.getRange(userRow, 10).setValue(data.value);
+      if (data.type === 'prefix') cosSheet.getRange(userRow, 11).setValue(data.value);
       cosSheet.getRange(userRow, 6).setValue(newSpent);
       // Update owned items column 7
       if (itemId) {
@@ -221,6 +242,14 @@ function doPost(e) {
         if (data.type === 'font') cosSheet.getRange(row, 3).setValue('');
         if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(row, 4).setValue(false);
         if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(row, 5).setValue(false);
+        if (data.type === 'decoration') {
+          const cur = cosSheet.getRange(row, 8).getValue() || '';
+          const parts = cur ? String(cur).split(' ').filter(p => p !== data.value) : [];
+          cosSheet.getRange(row, 8).setValue(parts.join(' '));
+        }
+        if (data.type === 'transform') cosSheet.getRange(row, 9).setValue(false);
+        if (data.type === 'effect') cosSheet.getRange(row, 10).setValue('');
+        if (data.type === 'prefix') cosSheet.getRange(row, 11).setValue('');
         break;
       }
     }
@@ -243,6 +272,15 @@ function doPost(e) {
         if (data.type === 'font') cosSheet.getRange(row, 3).setValue(data.value);
         if (data.type === 'style' && data.value === 'bold') cosSheet.getRange(row, 4).setValue(true);
         if (data.type === 'style' && data.value === 'italic') cosSheet.getRange(row, 5).setValue(true);
+        if (data.type === 'decoration') {
+          const cur = cosSheet.getRange(row, 8).getValue() || '';
+          const parts = cur ? String(cur).split(' ').filter(Boolean) : [];
+          if (!parts.includes(data.value)) parts.push(data.value);
+          cosSheet.getRange(row, 8).setValue(parts.join(' '));
+        }
+        if (data.type === 'transform') cosSheet.getRange(row, 9).setValue(true);
+        if (data.type === 'effect') cosSheet.getRange(row, 10).setValue(data.value);
+        if (data.type === 'prefix') cosSheet.getRange(row, 11).setValue(data.value);
         // No token charge — tokens_spent (col 6) is not modified
         break;
       }

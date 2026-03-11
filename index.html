@@ -824,6 +824,25 @@
       { id: 'font_impact',  type: 'font',  label: 'Impact',     value: 'Impact',        cost: 10 },
       { id: 'style_bold',   type: 'style', label: 'Bold',       value: 'bold',          cost: 3  },
       { id: 'style_italic', type: 'style', label: 'Italic',     value: 'italic',        cost: 3  },
+      // More colors
+      { id: 'color_blue',          type: 'color',      label: '🔵 Blue',         value: '#0066cc',       cost: 5  },
+      { id: 'color_orange',        type: 'color',      label: '🟠 Orange',        value: '#ff6600',       cost: 5  },
+      { id: 'color_teal',          type: 'color',      label: '🩵 Teal',          value: '#008080',       cost: 5  },
+      { id: 'color_cyan',          type: 'color',      label: '🩵 Cyan',          value: '#00cccc',       cost: 5  },
+      { id: 'color_lime',          type: 'color',      label: '🟩 Lime',          value: '#33cc00',       cost: 5  },
+      // Text decorations
+      { id: 'deco_underline',      type: 'decoration', label: 'U Underline',      value: 'underline',     cost: 3  },
+      { id: 'deco_strikethrough',  type: 'decoration', label: '~~Strikethrough~~', value: 'line-through', cost: 3  },
+      { id: 'style_uppercase',     type: 'transform',  label: 'UPPERCASE',        value: 'uppercase',     cost: 5  },
+      // Text effects
+      { id: 'effect_glow',         type: 'effect',     label: '✨ Glow',          value: 'glow',          cost: 15 },
+      { id: 'effect_shadow',       type: 'effect',     label: '🌑 Drop Shadow',   value: 'shadow',        cost: 10 },
+      // Name prefixes
+      { id: 'prefix_crown',        type: 'prefix',     label: '👑 Crown',         value: '👑',            cost: 20 },
+      { id: 'prefix_star',         type: 'prefix',     label: '⭐ Star',           value: '⭐',            cost: 10 },
+      { id: 'prefix_fire',         type: 'prefix',     label: '🔥 Fire',          value: '🔥',            cost: 10 },
+      { id: 'prefix_skull',        type: 'prefix',     label: '💀 Skull',         value: '💀',            cost: 10 },
+      { id: 'prefix_mvp',          type: 'prefix',     label: '[BRO] Tag',        value: '[BRO]',         cost: 25 },
     ];
 
     function selectRealName(btn) {
@@ -852,7 +871,8 @@
         document.querySelectorAll('.xp-name-btn').forEach(btn => {
             const orig = btn.dataset.realname;
             const display = nameMap[orig] || orig;
-            btn.childNodes[0].textContent = display + ' ';
+            const prefix = (cosmeticsMap[orig] || {}).prefix || '';
+            btn.childNodes[0].textContent = (prefix ? prefix + ' ' : '') + display + ' ';
             btn.style.cssText = nameStyle(orig);
         });
     }
@@ -1006,9 +1026,11 @@
                 const name = nameMap[origName] || origName;
                 const percentage = totalSessions > 0 ? Math.round((count / totalSessions) * 100) : 0;
                 const st = nameStyle(origName);
+                const pfx = (cosmeticsMap[origName] || {}).prefix || '';
+                const displayName = (pfx ? pfx + ' ' : '') + name;
                 statsHtml += `
                     <div class="stat-box">
-                        <div class="stat-label" style="font-weight:bold;${st ? ' ' + st : ''}">${name}</div>
+                        <div class="stat-label" style="font-weight:bold;${st ? ' ' + st : ''}">${displayName}</div>
                         <div class="stat-number">${count}</div>
                         <div class="stat-label">${percentage}% Attendance</div>
                     </div>
@@ -1026,7 +1048,9 @@
                         const orig = s.trim();
                         const disp = nameMap[orig] || orig;
                         const st = nameStyle(orig);
-                        return st ? `<span style="${st}">${disp}</span>` : disp;
+                        const pfx = (cosmeticsMap[orig] || {}).prefix || '';
+                        const displayName = (pfx ? pfx + ' ' : '') + disp;
+                        return st ? `<span style="${st}">${displayName}</span>` : displayName;
                     }).join(', ')}</td>
                 </tr>
             `).join('');
@@ -1083,16 +1107,23 @@
     function nameStyle(origName) {
         const c = cosmeticsMap[origName] || {};
         return [
-            c.color  ? `color:${c.color}`                    : '',
-            c.font   ? `font-family:'${c.font}',sans-serif`  : '',
-            c.bold   ? 'font-weight:bold'                    : '',
-            c.italic ? 'font-style:italic'                   : '',
+            c.color          ? `color:${c.color}`                                              : '',
+            c.font           ? `font-family:'${c.font}',sans-serif`                            : '',
+            c.bold           ? 'font-weight:bold'                                              : '',
+            c.italic         ? 'font-style:italic'                                             : '',
+            c.textDecoration ? `text-decoration:${c.textDecoration}`                           : '',
+            c.textTransform  ? 'text-transform:uppercase'                                      : '',
+            c.textEffect === 'glow'   ? 'text-shadow:0 0 6px currentColor,0 0 12px currentColor' : '',
+            c.textEffect === 'shadow' ? 'text-shadow:2px 2px 4px rgba(0,0,0,0.6)'              : '',
         ].filter(Boolean).join(';');
     }
 
     function applyAllCosmetics() {
         document.querySelectorAll('.xp-name-btn').forEach(btn => {
             const orig = btn.dataset.realname;
+            const prefix = (cosmeticsMap[orig] || {}).prefix || '';
+            const display = nameMap[orig] || orig;
+            btn.childNodes[0].textContent = (prefix ? prefix + ' ' : '') + display + ' ';
             btn.style.cssText = nameStyle(orig);
         });
     }
@@ -1147,6 +1178,10 @@
                 if (item.type === 'font') styles.push(`font-family:'${item.value}',sans-serif`);
                 if (item.type === 'style' && item.value === 'bold') styles.push('font-weight:bold');
                 if (item.type === 'style' && item.value === 'italic') styles.push('font-style:italic');
+                if (item.type === 'decoration') styles.push(`text-decoration:${item.value}`);
+                if (item.type === 'transform') styles.push('text-transform:uppercase');
+                if (item.type === 'effect' && item.value === 'glow') styles.push('text-shadow:0 0 6px currentColor,0 0 12px currentColor');
+                if (item.type === 'effect' && item.value === 'shadow') styles.push('text-shadow:2px 2px 4px rgba(0,0,0,0.6)');
                 return styles.join(';');
             })();
 
@@ -1154,11 +1189,19 @@
                 if (item.type === 'color') return userCosmetics.color === item.value;
                 if (item.type === 'font') return userCosmetics.font === item.value;
                 if (item.type === 'style') return userCosmetics[item.value] === true;
+                if (item.type === 'decoration') return (userCosmetics.textDecoration || '').split(' ').includes(item.value);
+                if (item.type === 'transform') return userCosmetics.textTransform === true;
+                if (item.type === 'effect') return userCosmetics.textEffect === item.value;
+                if (item.type === 'prefix') return userCosmetics.prefix === item.value;
                 return false;
             })();
 
             const canAfford = balance >= item.cost;
-            const previewName = currentUser ? (nameMap[currentUser] || currentUser) : 'Preview';
+            const currentPrefix = (cosmeticsMap[currentUser] || {}).prefix || '';
+            const baseName = currentUser ? (nameMap[currentUser] || currentUser) : 'Preview';
+            const previewName = item.type === 'prefix'
+                ? item.value + ' ' + baseName
+                : (currentPrefix ? currentPrefix + ' ' : '') + baseName;
             const ownedItems = userCosmetics.ownedItems || [];
             const isOwned = ownedItems.includes(item.id);
 
@@ -1193,6 +1236,15 @@
         if (item.type === 'color') cosmeticsMap[currentUser].color = item.value;
         if (item.type === 'font') cosmeticsMap[currentUser].font = item.value;
         if (item.type === 'style') cosmeticsMap[currentUser][item.value] = true;
+        if (item.type === 'decoration') {
+            const cur = cosmeticsMap[currentUser].textDecoration || '';
+            const parts = cur ? cur.split(' ') : [];
+            if (!parts.includes(item.value)) parts.push(item.value);
+            cosmeticsMap[currentUser].textDecoration = parts.join(' ');
+        }
+        if (item.type === 'transform') cosmeticsMap[currentUser].textTransform = true;
+        if (item.type === 'effect') cosmeticsMap[currentUser].textEffect = item.value;
+        if (item.type === 'prefix') cosmeticsMap[currentUser].prefix = item.value;
         if (!cosmeticsMap[currentUser].ownedItems) cosmeticsMap[currentUser].ownedItems = [];
         if (!cosmeticsMap[currentUser].ownedItems.includes(item.id)) cosmeticsMap[currentUser].ownedItems.push(item.id);
 
@@ -1231,6 +1283,15 @@
         if (item.type === 'color') cosmeticsMap[currentUser].color = item.value;
         if (item.type === 'font') cosmeticsMap[currentUser].font = item.value;
         if (item.type === 'style') cosmeticsMap[currentUser][item.value] = true;
+        if (item.type === 'decoration') {
+            const cur = cosmeticsMap[currentUser].textDecoration || '';
+            const parts = cur ? cur.split(' ') : [];
+            if (!parts.includes(item.value)) parts.push(item.value);
+            cosmeticsMap[currentUser].textDecoration = parts.join(' ');
+        }
+        if (item.type === 'transform') cosmeticsMap[currentUser].textTransform = true;
+        if (item.type === 'effect') cosmeticsMap[currentUser].textEffect = item.value;
+        if (item.type === 'prefix') cosmeticsMap[currentUser].prefix = item.value;
 
         applyAllCosmetics();
         renderShop();
@@ -1258,6 +1319,15 @@
         if (item.type === 'color') delete cosmeticsMap[currentUser].color;
         if (item.type === 'font') delete cosmeticsMap[currentUser].font;
         if (item.type === 'style') cosmeticsMap[currentUser][item.value] = false;
+        if (item.type === 'decoration') {
+            const cur = cosmeticsMap[currentUser].textDecoration || '';
+            const parts = cur ? cur.split(' ').filter(p => p !== item.value) : [];
+            if (parts.length > 0) cosmeticsMap[currentUser].textDecoration = parts.join(' ');
+            else delete cosmeticsMap[currentUser].textDecoration;
+        }
+        if (item.type === 'transform') cosmeticsMap[currentUser].textTransform = false;
+        if (item.type === 'effect') delete cosmeticsMap[currentUser].textEffect;
+        if (item.type === 'prefix') delete cosmeticsMap[currentUser].prefix;
         // Keep ownership so "Equip" button shows instead of "Buy"
         if (!cosmeticsMap[currentUser].ownedItems) cosmeticsMap[currentUser].ownedItems = [];
         if (!cosmeticsMap[currentUser].ownedItems.includes(item.id)) cosmeticsMap[currentUser].ownedItems.push(item.id);
