@@ -56,7 +56,7 @@
             flex-direction: column;
         }
 
-        #win-stats    { flex: 2 1 520px; }
+        #win-stats      { flex: 2 1 520px; }
         #win-attendance { flex: 1 1 320px; }
 
         .xp-titlebar {
@@ -579,26 +579,10 @@
             resize: vertical;
         }
 
-        /* ── Shop overlay ── */
-        #win-shop-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-        }
-
-        #win-shop {
-            width: 440px;
-            max-width: 96vw;
-        }
+        #win-shop { flex: 1.5 1 380px; }
 
         #win-shop .xp-window-body {
-            padding: 16px 20px 20px;
             overflow-y: auto;
-            max-height: calc(90vh - 40px);
         }
 
         .shop-grid {
@@ -642,28 +626,6 @@
             margin-bottom: 10px;
         }
 
-        #taskbar-shop-btn {
-            height: 22px;
-            padding: 0 8px;
-            background: linear-gradient(180deg, #4a7ae8 0%, #3060c8 100%);
-            border: 1px solid #1448a0;
-            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 0 rgba(0,0,0,0.2);
-            border-radius: 2px;
-            color: #fff;
-            font-size: 10px;
-            font-family: Tahoma, Arial, sans-serif;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        #taskbar-shop-btn:hover {
-            background: linear-gradient(180deg, #5a8af8 0%, #4070d8 100%);
-        }
-
-        #taskbar-shop-btn:active {
-            background: linear-gradient(180deg, #2050b8 0%, #3060c8 100%);
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
-        }
     </style>
 </head>
 <body>
@@ -732,6 +694,16 @@
         </div>
     </div>
 
+    <!-- Shop Window -->
+    <div class="xp-window" id="win-shop">
+        <div class="xp-titlebar">
+            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="9" rx="1" fill="#fff" opacity=".8"/><path d="M5 4 Q5 2 8 2 Q11 2 11 4" stroke="#4a90e2" stroke-width="1.5" fill="none"/></svg>
+            <span class="xp-titlebar-title">🛒 Shop</span>
+        </div>
+        <div class="xp-window-body">
+            <div id="shopContent">Loading…</div>
+        </div>
+    </div>
 
 </div><!-- /#xp-desktop -->
 
@@ -739,25 +711,7 @@
 <!-- ══════════════════ TASKBAR ══════════════════ -->
 <div id="xp-taskbar">
     <span id="taskbar-title">friend attendance</span>
-<button id="taskbar-shop-btn" onclick="openShop()">[ shop ]</button>
     <span id="taskbar-credit">by: luigi</span>
-</div>
-
-
-<!-- ══════════════════ SHOP OVERLAY ══════════════════ -->
-<div id="win-shop-overlay" class="hidden">
-    <div class="xp-window" id="win-shop">
-        <div class="xp-titlebar">
-            <svg class="xp-titlebar-icon" viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="9" rx="1" fill="#fff" opacity=".8"/><path d="M5 4 Q5 2 8 2 Q11 2 11 4" stroke="#4a90e2" stroke-width="1.5" fill="none"/></svg>
-            <span class="xp-titlebar-title">🛒 Shop</span>
-            <div class="xp-win-controls">
-                <button class="xp-win-btn close" onclick="closeShop()">✕</button>
-            </div>
-        </div>
-        <div class="xp-window-body">
-            <div id="shopContent">Loading…</div>
-        </div>
-    </div>
 </div>
 
 
@@ -1153,15 +1107,6 @@
         }
     }
 
-    function openShop() {
-        renderShop();
-        document.getElementById('win-shop-overlay').classList.remove('hidden');
-    }
-
-    function closeShop() {
-        document.getElementById('win-shop-overlay').classList.add('hidden');
-    }
-
     function renderShop() {
         const balance = currentUser && tokensMap[currentUser] !== undefined ? tokensMap[currentUser] : 0;
         const userCosmetics = cosmeticsMap[currentUser] || {};
@@ -1361,6 +1306,7 @@
         document.getElementById('xp-login-overlay').classList.add('hidden');
         document.getElementById('xp-desktop').classList.remove('login-blur');
         updateTokenDisplay();
+        renderShop();
     }
 
     // ── Window chrome handlers ──
